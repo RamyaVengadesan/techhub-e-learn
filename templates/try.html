@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Try it editor | TechHub{% endblock %}
+{% block plain %}
+<div class="wrap">
+  <h1>Try it editor</h1>
+  <p>{% if back %}Editing the example from <a href="{{ url_for('lesson', mod=back.module, slug=back.slug) }}">{{ back.title }}</a>. {% endif %}Write any HTML and CSS, then press <b>Run</b> (or Ctrl+Enter).</p>
+  <div class="editor tall" data-editor>
+    <div class="pane">
+      <div class="pane-head">Code <button class="btn small" type="button" data-run>Run &#9656;</button></div>
+      <textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ code }}</textarea>
+    </div>
+    <div class="pane">
+      <div class="pane-head">Result</div>
+      <iframe title="Result" sandbox="" data-out></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}

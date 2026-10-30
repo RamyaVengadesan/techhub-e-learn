@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Quiz | TechHub{% endblock %}
+{% block plain %}
+<div class="wrap narrow">
+  <p class="crumbs"><a href="{{ url_for('quiz_pick') }}">&lsaquo; All quizzes</a></p>
+  <h1>{{ module.title ~ ' Quiz' if module else 'HTML + CSS Quiz' }}</h1>
+  <p class="lead">Ten random questions. Answer them all, then see your score.</p>
+  <div id="quiz" data-module="{{ mod }}" aria-live="polite"><p>Loading questions...</p></div>
+</div>
+{% endblock %}

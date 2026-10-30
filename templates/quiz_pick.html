@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Quizzes | TechHub{% endblock %}
+{% block plain %}
+<div class="wrap">
+  <h1>Quizzes</h1>
+  <p class="lead">Ten random questions per round. Pick a module, or mix them all.</p>
+  <div class="mods">
+    {% for m in modules %}
+    <article class="mod"><div class="mod-badge {{ m.slug }}">{{ m.title }}</div><h3>{{ m.title }} quiz</h3><p>{{ counts[m.slug] }} questions to draw from.</p>
+      <p><a class="btn" href="{{ url_for('quiz', mod=m.slug) }}">Start {{ m.title }} quiz</a></p></article>
+    {% endfor %}
+    <article class="mod"><div class="mod-badge all">Mix</div><h3>HTML + CSS</h3><p>{{ counts.values()|sum }} questions from both modules.</p>
+      <p><a class="btn" href="{{ url_for('quiz', mod='all') }}">Start mixed quiz</a></p></article>
+  </div>
+</div>
+{% endblock %}

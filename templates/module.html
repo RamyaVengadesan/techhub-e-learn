@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ module.title }} Tutorial | TechHub{% endblock %}
+{% block content %}
+<section class="mod-hero {{ module.slug }}">
+  <p class="eyebrow light">Module</p>
+  <h1>{{ module.title }} Tutorial</h1>
+  <p class="lead">{{ module.tagline }}</p>
+  <p><a class="btn big white" id="startBtn" href="{{ url_for('lesson', mod=module.slug, slug=module.lessons[0].slug) }}">Start the course</a>
+     <a class="btn big outline" href="{{ url_for('quiz', mod=module.slug) }}">Take the {{ module.title }} quiz</a></p>
+</section>
+<div class="progress-card">
+  <b data-progress-text="{{ module.lessons|map(attribute='slug')|join(',') }}">0% complete</b>
+  <div class="bar"><i data-progress="{{ module.lessons|map(attribute='slug')|join(',') }}" style="width:0"></i></div>
+</div>
+{% for g in module.groups %}
+  <h2 class="group">{{ g }}</h2>
+  <div class="cards">
+  {% for l in module.lessons if l.group == g %}
+    <a class="card" href="{{ url_for('lesson', mod=module.slug, slug=l.slug) }}" data-slug="{{ l.slug }}">
+      <b>{{ l.title }}</b><span>{{ l.intro }}</span><i class="tick" aria-hidden="true"></i>
+    </a>
+  {% endfor %}
+  </div>
+{% endfor %}
+{% endblock %}

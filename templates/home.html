@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block plain %}
+<section class="hero">
+  <div class="hero-in">
+    <div>
+      <p class="eyebrow light">Free online courses</p>
+      <h1>Learn web development, one clear lesson at a time</h1>
+      <p class="lead">TechHub teaches HTML and CSS with short lessons, live code you can edit, and quizzes that check what you learned. No sign-up needed.</p>
+      <p><a class="btn big white" id="startBtn" href="{{ url_for('module', mod='html') }}">Start with HTML</a>
+         <a class="btn big outline" href="{{ url_for('module', mod='css') }}">Explore CSS</a></p>
+      <ul class="stats"><li><b>{{ total }}</b> lessons</li><li><b>{{ modules|length }}</b> modules</li><li><b>{{ questions }}</b> quiz questions</li></ul>
+    </div>
+    <div class="hero-code" aria-hidden="true">
+<pre class="code"><code><span class="t">&lt;h1</span> <span class="a">class</span>=<span class="s">"title"</span><span class="t">&gt;</span>Hello, TechHub!<span class="t">&lt;/h1&gt;</span>
+
+<span class="t">&lt;style&gt;</span>
+<span class="sel">.title</span> {
+  <span class="p">color</span>: <span class="v">#1d5bd8</span>;
+  <span class="p">font-size</span>: <span class="v">2rem</span>;
+}
+<span class="t">&lt;/style&gt;</span></code></pre>
+      <div class="hero-result">Hello, TechHub!</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2 class="center">Choose a module</h2>
+  <p class="center sub">Each module is a complete course. Learn HTML first, then style your pages with CSS.</p>
+  <div class="mods">
+  {% for m in modules %}
+    <article class="mod">
+      <div class="mod-badge {{ m.slug }}">{{ m.title }}</div>
+      <h3>{{ m.title }} Tutorial</h3>
+      <p>{{ m.tagline }}</p>
+      <p class="meta">{{ m.lessons|length }} lessons &middot; {{ m.groups|length }} sections</p>
+      <div class="bar"><i data-progress="{{ m.lessons|map(attribute='slug')|join(',') }}" style="width:0"></i></div>
+      <p class="small" data-progress-text="{{ m.lessons|map(attribute='slug')|join(',') }}">0% complete</p>
+      <p><a class="btn" href="{{ url_for('module', mod=m.slug) }}">Open {{ m.title }} course</a>
+         <a class="btn ghost" href="{{ url_for('quiz', mod=m.slug) }}">Take the quiz</a></p>
+    </article>
+  {% endfor %}
+  </div>
+
+  <h2 class="center">How learning works here</h2>
+  <div class="feat">
+    <div><b>1. Read</b><p>Short, plain explanations with code you can copy.</p></div>
+    <div><b>2. Try</b><p>Edit every example in the live editor and see the result at once.</p></div>
+    <div><b>3. Test</b><p>Answer exercises after each lesson and take module quizzes.</p></div>
+    <div><b>4. Track</b><p>Your progress is saved in your browser so you can continue later.</p></div>
+  </div>
+</section>
+{% endblock %}
