@@ -1,6 +1,6 @@
 # TechHub
 
-A blue and white online learning platform with two modules: **HTML** (54 lessons) and **CSS** (66 lessons).
+A online learning platform with two modules: **HTML** (54 lessons) and **CSS** (66 lessons).
 Each lesson has a clear explanation, highlighted code, a live "Try it yourself" editor and exercises. Each module has its own 10-question quiz, and there is a mixed quiz. Progress is saved in the browser.
 
 ## Run it
