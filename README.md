@@ -93,14 +93,3 @@ Any host that runs Python will do (Render, Railway, PythonAnywhere).
 - Start: `gunicorn app:app`
 
 SQLite is just a file, so on hosts where the disk resets on every deploy you'll lose accounts and feedback unless you attach a persistent disk and point `DB_PATH` at it.
-
-## Still to do
-
-- Password reset by email
-- Email verification
-- A page for deleting an account
-- The Privacy and Terms pages are only templates. Read through them before going live.
-
-## License
-
-Not added yet. Put a `LICENSE` file in the repo (MIT is the usual choice) before making it public.
