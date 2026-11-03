@@ -1,18 +1,20 @@
 {% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
 {% block title %}Try it editor | TechHub{% endblock %}
 {% block plain %}
-<div class="wrap">
-  <h1>Try it editor</h1>
-  <p>{% if back %}Editing the example from <a href="{{ url_for('lesson', mod=back.module, slug=back.slug) }}">{{ back.title }}</a>. {% endif %}Write any HTML and CSS, then press <b>Run</b> (or Ctrl+Enter).</p>
-  <div class="editor tall" data-editor>
-    <div class="pane">
-      <div class="pane-head">Code <button class="btn small" type="button" data-run>Run &#9656;</button></div>
-      <textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ code }}</textarea>
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', 'Try it editor', 'Write HTML, CSS and JavaScript in one place and see the result straight away.', tabs=ptabs, active='try', icon='code') }}
+  <p class="x-note">{% if back_project is defined and back_project %}Editing the finished <a href="{{ url_for('project', slug=back_project.slug) }}">{{ back_project.title }}</a> project. {% elif back %}Editing the example from <a href="{{ url_for('lesson', mod=back.module, slug=back.slug) }}">{{ back.title }}</a>. {% endif %}Press <b>Run</b> or <kbd>Ctrl</kbd> + <kbd>Enter</kbd>.</p>
+  <div class="editor split tall" data-editor>
+    <div class="ed-bar">
+      <span class="ed-title"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ed-file">index.html</span></span>
+      <span class="ed-actions"><span class="ed-hint">Ctrl + Enter to run</span><button class="ed-reset" type="button" data-reset>Reset</button><button class="btn small ed-run" type="button" data-run><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Run</button></span>
     </div>
-    <div class="pane">
-      <div class="pane-head">Result</div>
-      <iframe title="Result" sandbox="" data-out></iframe>
+    <div class="panes">
+      <div class="pane-in"><div class="pane-label">Code</div><textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ code }}</textarea></div>
+      <div class="pane-out"><div class="ed-bar res"><span class="pane-label">Result</span><span class="live"><i></i>Live preview</span></div><iframe title="Result" sandbox="allow-scripts" data-out></iframe></div>
     </div>
   </div>
-</div>
+{% endcall %}
 {% endblock %}

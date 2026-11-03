@@ -1,16 +1,25 @@
 {% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
 {% block title %}Quizzes | TechHub{% endblock %}
 {% block plain %}
-<div class="wrap">
-  <h1>Quizzes</h1>
-  <p class="lead">Ten random questions per round. Pick a module, or mix them all.</p>
-  <div class="mods">
-    {% for m in modules %}
-    <article class="mod"><div class="mod-badge {{ m.slug }}">{{ m.title }}</div><h3>{{ m.title }} quiz</h3><p>{{ counts[m.slug] }} questions to draw from.</p>
-      <p><a class="btn" href="{{ url_for('quiz', mod=m.slug) }}">Start {{ m.title }} quiz</a></p></article>
-    {% endfor %}
-    <article class="mod"><div class="mod-badge all">Mix</div><h3>HTML + CSS</h3><p>{{ counts.values()|sum }} questions from both modules.</p>
-      <p><a class="btn" href="{{ url_for('quiz', mod='all') }}">Start mixed quiz</a></p></article>
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', 'Quizzes', 'Choose a language, then a level. Each round has ten questions and your best score is saved in this browser.', tabs=ptabs, active='quizzes', stats=[(modules|length * 3, 'Quizzes'), (10, 'Questions each')], icon='help') }}
+  <div class="x-quizgrid">
+  {% for m in modules %}
+  <section class="x-qmod t-{{ m.slug }}">
+    <h2 class="x-sec-title"><i class="lg lg-{{ m.slug }}">{{ 'JS' if m.slug == 'js' else m.title }}</i>{{ m.title }}</h2>
+    <div class="x-qlevels">
+      {% for key, name in levels %}
+      <a class="level x-qlevel {{ key }}" href="{{ url_for('quiz', mod=m.slug, level=key) }}" data-best="{{ m.slug }}:{{ key }}">
+        <span class="x-qbars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="x-qtext"><b>{{ name }}</b><span>{{ counts[m.slug][key] }} questions</span><em class="best"></em></span>
+        {{ ico('arrow') }}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
   </div>
-</div>
+{% endcall %}
 {% endblock %}

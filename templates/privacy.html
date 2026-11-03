@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Privacy policy | {{ site_name }}{% endblock %}
+{% block description %}How {{ site_name }} handles your data.{% endblock %}
+{% block plain %}
+<div class="wrap narrow legal">
+  <h1>Privacy policy</h1>
+  <p class="small">Template. The site owner should review and edit this text for their own situation and local law.</p>
+  <h2>What this site collects</h2>
+  <p>You do not need an account to read lessons. An account is optional and only used to save your progress.</p>
+  <ul>
+    <li><b>Saved in your browser.</b> Your progress, best quiz scores and theme choice are stored in your browser's local storage on your own device. We do not receive them. You can clear them in your browser settings.</li>
+    <li><b>Optional account.</b> If you sign up, we store your name, email address, a hashed (not readable) password, your daily pace setting, and the lessons you have finished with the time you finished them. We use this only to show your progress, streak and daily plan. We do not send marketing email.</li>
+    <li><b>Lesson feedback.</b> If you press Yes or No under a lesson, we store the lesson name, your answer and the time. It is not linked to you.</li>
+    <li><b>Server logs.</b> Like most websites, our server or hosting provider may record technical information such as your IP address, browser type and the pages requested, for security and to keep the site running.</li>
+  </ul>
+  <h2>Code you type</h2>
+  <p>Code you write in the editors runs in your browser inside a sandbox. It is not sent to or stored on our server.</p>
+  <h2>Third-party services</h2>
+  <p>Pages load the Inter, Manrope and JetBrains Mono fonts from Google Fonts, which means your browser contacts Google when a page loads. Your hosting provider also processes requests to deliver the site.</p>
+  <h2>Cookies</h2>
+  <p>If you log in, we set one essential cookie that keeps you logged in, and a small cookie that records your time zone so streaks use your local day. We set no advertising or tracking cookies. Local storage is used as described above.</p>
+  <h2>Contact</h2>
+  <p>Questions about this policy: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, shell with context %}
+{% block title %}Flexbox playground | {{ site_name }}{% endblock %}
+{% block description %}Try flex-direction, justify-content, align-items, flex-wrap and gap and copy the CSS.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'Flexbox playground', 'Change the controls to see how a flex container arranges its items.', tabs=ttabs, active='tools', icon='flex') }}
+  <div class="tool" data-tool="flexbox">
+    <div class="controls">
+      <label>flex-direction<select data-prop="flex-direction"><option>row</option><option>row-reverse</option><option>column</option><option>column-reverse</option></select></label>
+      <label>justify-content<select data-prop="justify-content"><option>flex-start</option><option>center</option><option>flex-end</option><option>space-between</option><option>space-around</option><option>space-evenly</option></select></label>
+      <label>align-items<select data-prop="align-items"><option>stretch</option><option>flex-start</option><option>center</option><option>flex-end</option><option>baseline</option></select></label>
+      <label>flex-wrap<select data-prop="flex-wrap"><option>nowrap</option><option>wrap</option><option>wrap-reverse</option></select></label>
+      <label>gap: <output data-out="gap">12px</output><input type="range" min="0" max="48" value="12" data-range="gap"></label>
+      <label>Items: <output data-out="count">4</output><input type="range" min="1" max="10" value="4" data-range="count"></label>
+    </div>
+    <div class="stage"><div class="demo-box" data-stage></div></div>
+    <div class="codebox"><div class="cb-bar"><span>CSS</span><button type="button" data-copy>Copy</button></div><pre class="code"><code data-css></code></pre></div>
+  </div>
+  <p>Learn more in the <a href="{{ url_for('lesson', mod='css', slug='css-flexbox') }}">Flexbox lesson</a> and the <a href="{{ url_for('cheatsheet', slug='css-flexbox-grid') }}">Flexbox and Grid cheat sheet</a>.</p>
+{% endcall %}
+<script src="{{ url_for('static', filename='js/tools.js') }}"></script>
+{% endblock %}

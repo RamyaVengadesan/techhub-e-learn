@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}{{ m.title }} Quizzes | TechHub{% endblock %}
+{% block plain %}
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', m.title ~ ' quizzes', 'Start with Beginner and work up. Each round has ten questions.', tabs=ptabs, active='quizzes', icon='help') }}
+  <div class="x-qlevels">
+    {% for key, name in levels %}
+    <a class="level x-qlevel {{ key }}" href="{{ url_for('quiz', mod=m.slug, level=key) }}" data-best="{{ m.slug }}:{{ key }}">
+      <span class="x-qbars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="x-qtext"><b>{{ name }}</b><span>{{ counts[key] }} questions</span><em class="best"></em></span>
+      {{ ico('arrow') }}
+    </a>
+    {% endfor %}
+  </div>
+  <p><a href="{{ url_for('quiz_pick') }}">All quizzes</a></p>
+{% endcall %}
+{% endblock %}

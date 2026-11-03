@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Log in | {{ site_name }}{% endblock %}
+{% block plain %}
+<div class="auth">
+  <div class="authbox">
+    <h1>Log in</h1>
+    <p class="small">Log in to save your progress and follow your daily learning path. You can also learn without an account.</p>
+    {% if error %}<p class="autherr" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('login', next=next) if next else url_for('login') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Email<input type="email" name="email" value="{{ email }}" autocomplete="email" required autofocus></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+    <p class="small">New here? <a href="{{ url_for('signup') }}">Create a free account</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_ui.html" import ico %}
+{% block title %}{{ ref.title }} | TechHub{% endblock %}
+{% block plain %}
+<div class="x-ref">
+  <aside class="x-ref-side" aria-label="Reference pages">
+    <a class="x-back" href="{{ url_for('reference_index') }}">{{ ico('arrow') }}All references</a>
+    {% for m in modules %}<h4>{{ m.title }}</h4>
+      {% for r in refs if r.module == m.slug %}<a href="{{ url_for('reference', slug=r.slug) }}" {% if r.slug == ref.slug %}class="on" aria-current="page"{% endif %}>{{ r.title|replace(m.title ~ ' ', '', 1) }}</a>{% endfor %}
+    {% endfor %}
+  </aside>
+  <div class="x-ref-main">
+    <p class="x-crumb"><a href="{{ url_for('home') }}">Home</a><span aria-hidden="true">/</span><a href="{{ url_for('reference_index') }}">Reference</a><span aria-hidden="true">/</span><span>{{ ref.title }}</span></p>
+    <h1>{{ ref.title }}</h1>
+    <p class="x-lead">{{ ref.intro }}</p>
+    <p class="x-meta"><span><b>{{ ref.groups|map(attribute='items')|map('length')|sum }}</b> entries</span><span><b>{{ ref.groups|length }}</b> groups</span><span>Click a name to open its lesson</span></p>
+    <div class="x-reftools">
+      <div class="x-search"><span class="x-search-ico">{{ ico('search') }}</span><label class="sr-only" for="rq">Filter this table</label><input id="rq" type="search" placeholder="Filter by name or description" autocomplete="off"></div>
+      <div class="ref-jump x-jump">{% for g in ref.groups %}<a href="#g{{ loop.index }}">{{ g.name }}</a>{% endfor %}</div>
+    </div>
+    {% for g in ref.groups %}
+    <section class="ref-group x-refgroup" id="g{{ loop.index }}">
+      <h2>{{ g.name }}<small>{{ g['items']|length }}</small></h2>
+      <div class="x-tablewrap">
+      <table class="ref">
+        <thead><tr><th class="c1">{{ ref.cols[0] }}</th><th>{{ ref.cols[1] }}</th>{% if ref.cols|length > 2 %}<th class="c3">{{ ref.cols[2] }}</th>{% endif %}</tr></thead>
+        <tbody>
+        {% for it in g['items'] %}
+          <tr>
+            <td class="c1">{% if it.lesson and it.lesson in lessons %}<a href="{{ url_for('lesson', mod=lessons[it.lesson].module, slug=it.lesson) }}"><code>{{ it.name }}</code></a>{% else %}<code>{{ it.name }}</code>{% endif %}</td>
+            <td>{{ it.desc|rich }}</td>
+            {% if ref.cols|length > 2 %}<td class="c3">{{ (it.extra or '')|rich }}</td>{% endif %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </section>
+    {% endfor %}
+    <p class="none" id="rnone" hidden>No entries match your filter.</p>
+  </div>
+</div>
+{% endblock %}

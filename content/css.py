@@ -1263,6 +1263,498 @@ L("css-best-practices", "CSS Best Practices", "Advanced",
    ("Why name a class `.card-title` instead of `.blue-text`?", ["It describes purpose, so the colour can change freely", "Blue is not a valid word", "Class names must contain hyphens only", "It loads faster"], 0)]),
 ]
 
+# ============================================================ Advanced CSS (added)
+GROUPS.append("Advanced CSS")
+
+LESSONS += [
+L("css-container-queries", "CSS Container Queries", "Advanced CSS",
+  "Container queries style an element based on the size of its container instead of the whole screen, so components adapt wherever you place them.",
+  [("Create a container", "Mark the parent with `container-type: inline-size`. You can also give it a `container-name`.",
+    "<style>\n  .wrap { container-type: inline-size; container-name: card; }\n</style>"),
+   ("Query the container", "Use `@container` with a condition, just like a media query. The children change when the container, not the screen, becomes wider or narrower.",
+    "<style>\n  @container card (min-width: 380px) {\n    .card { grid-template-columns: 90px 1fr; }\n  }\n</style>"),
+   ("Why it matters", "The same card can sit in a wide main column or a narrow sidebar and always choose the best layout.")],
+  '''<style>
+  .wrap { container-type: inline-size; container-name: card; resize: horizontal; overflow: auto; width: 100%; max-width: 100%; min-width: 180px; border: 2px dashed #1d5bd8; padding: 8px; }
+  .card { display: grid; gap: 8px; background: #eaf2ff; padding: 12px; border-radius: 10px; font: 15px sans-serif; }
+  .pic { background: #1d5bd8; height: 70px; border-radius: 8px; }
+  @container card (min-width: 380px) { .card { grid-template-columns: 90px 1fr; } }
+</style>
+<div class="wrap">
+  <div class="card"><div class="pic"></div><div><b>Container query</b><p style="margin:4px 0 0">Drag the corner of the dashed box. Wide: two columns. Narrow: stacked.</p></div></div>
+</div>''',
+  "Container queries work in all current major browsers. Use `cqw` units to size things relative to the container width.",
+  [("Which property makes an element a size container for container queries?", ["container-type", "container-size", "query-box", "contain-width"], 0),
+   ("What does `@container` respond to?", ["The size of a parent container", "The screen width only", "The device orientation only", "The page scroll position"], 0)]),
+
+L("css-has-is-where", "CSS :has(), :is() and :where()", "Advanced CSS",
+  "Three modern selectors make your CSS shorter and more powerful: `:has()` looks at children, `:is()` groups selectors and `:where()` groups with zero specificity.",
+  [(":has() the parent selector", "`:has()` selects an element based on what it contains. `.card:has(img)` matches only cards that have an image.",
+    "<style>\n  .card:has(img) { border-color: royalblue; }\n  label:has(input:checked) { background: #d6e6ff; }\n</style>"),
+   (":is() groups selectors", "`:is(h1, h2, h3)` replaces repeating a long selector list.",
+    "<style>\n  :is(h1, h2, h3) a { color: inherit; }\n</style>"),
+   (":where() has no weight", "`:where()` works like `:is()` but adds no specificity, so its rules are easy to override. Ideal for resets and defaults.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .card { border: 2px solid #ccd; border-radius: 10px; padding: 10px; margin: 8px 0; }
+  .card:has(.badge) { border-color: #1d5bd8; background: #eaf2ff; }
+  .badge { background: #1d5bd8; color: #fff; font-size: 12px; padding: 1px 8px; border-radius: 10px; }
+  label { display: block; padding: 6px 10px; border-radius: 8px; margin: 4px 0; }
+  label:has(input:checked) { background: #d6e6ff; font-weight: 700; }
+  :is(h3, h4) { color: #0b2a63; margin: 4px 0; }
+  :where(p) { margin: 4px 0; }
+</style>
+<div class="card"><h3>Plain card</h3><p>No badge inside.</p></div>
+<div class="card"><h3>Featured card <span class="badge">NEW</span></h3><p>The parent changed because it has a badge.</p></div>
+<label><input type="checkbox"> Click me: the label highlights</label>''',
+  "`:has()` is supported in all current browsers. Avoid very large `:has()` selectors on huge pages.",
+  [("Which selector chooses a parent based on what it contains?", [":has()", ":parent()", ":contains()", ":inside()"], 0),
+   ("What is special about the specificity of `:where()`?", ["It is always zero", "It is the highest possible", "It equals one id", "It doubles the inner selector"], 0),
+   ("What does `:is(h1, h2, h3)` do?", ["Matches any of the listed selectors", "Matches only h1", "Matches elements inside all three", "Removes the headings"], 0)]),
+
+L("css-nesting", "CSS Nesting", "Advanced CSS",
+  "Native CSS nesting lets you write child rules inside a parent rule, with no preprocessor, so related styles stay together.",
+  [("Nesting rules", "Place a selector inside another rule and it applies to descendants of the parent.",
+    "<style>\n  .card {\n    padding: 12px;\n    h3 { color: navy; }\n    p { margin: 0; }\n  }\n</style>"),
+   ("The & symbol", "`&` stands for the parent selector. Use it for states and modifiers: `&:hover` and `&.active`.",
+    "<style>\n  .btn {\n    background: royalblue;\n    &:hover { background: navy; }\n    &.big { font-size: 1.4rem; }\n  }\n</style>"),
+   ("Nested media queries", "You can nest `@media` inside a rule, so a component's responsive styles stay beside the component.")],
+  '''<style>
+  .card {
+    font: 15px sans-serif; padding: 12px; border: 2px solid #d5e1f5; border-radius: 10px; max-width: 320px;
+    h3 { margin: 0 0 6px; color: #0b2a63; }
+    p { margin: 0 0 10px; }
+    .btn {
+      background: #1d5bd8; color: #fff; border: 0; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+      &:hover { background: #0b2a63; }
+      &.big { font-size: 18px; }
+    }
+    @media (max-width: 300px) { padding: 6px; }
+  }
+</style>
+<div class="card"><h3>Nested styles</h3><p>All rules for this card live in one block.</p><button class="btn">Normal</button> <button class="btn big">Big</button></div>''',
+  "Native nesting works in current browsers. Older browsers ignore nested rules, so check support if you must serve them.",
+  [("Which symbol refers to the parent selector in nested CSS?", ["&", "#", "@", "*"], 0),
+   ("What is the main benefit of CSS nesting?", ["Related rules stay together without a preprocessor", "It makes pages load twice as fast", "It removes the need for classes", "It adds animations"], 0)]),
+
+L("css-layers", "CSS Cascade Layers", "Advanced CSS",
+  "`@layer` lets you control which group of styles wins, regardless of selector specificity, which makes large stylesheets predictable.",
+  [("Declare the order", "List the layers once. Later layers beat earlier ones.",
+    "<style>\n  @layer base, components, utilities;\n</style>"),
+   ("Put styles in layers", "Wrap rules in `@layer name { ... }`. A low-specificity rule in a later layer beats a high-specificity rule in an earlier layer.",
+    "<style>\n  @layer base { #page p { color: gray; } }\n  @layer utilities { .red { color: crimson; } }\n</style>"),
+   ("Unlayered styles", "Styles outside any layer beat all layers (except `!important` reversals). Third-party CSS is often placed in the first layer so your own styles win.")],
+  '''<style>
+  @layer base, components, utilities;
+  @layer base { #page p { color: gray; font: 16px sans-serif; } }
+  @layer utilities { .alert { color: #b42318; font-weight: 700; } }
+</style>
+<div id="page">
+  <p>A normal paragraph with an id selector in the base layer.</p>
+  <p class="alert">This class is lighter than #page p, yet it wins because utilities is a later layer.</p>
+</div>''',
+  "Without layers, `#page p` would win on specificity and the paragraph would stay gray.",
+  [("Which at-rule creates a cascade layer?", ["@layer", "@cascade", "@group", "@stack"], 0),
+   ("Which wins between two layers?", ["The layer declared last", "The layer declared first", "The one with more rules", "The one with the longest name"], 0),
+   ("Do unlayered styles beat layered styles?", ["Yes, normally", "No, never", "Only for colours", "Only with !important"], 0)]),
+
+L("css-supports", "CSS @supports", "Advanced CSS",
+  "`@supports` applies CSS only if the browser understands a feature, so you can use new features safely with a fallback.",
+  [("Syntax", "Put a property and value test in brackets, then the rules to apply.",
+    "<style>\n  @supports (display: grid) {\n    .layout { display: grid; }\n  }\n</style>"),
+   ("not, and, or", "Combine tests: `@supports not (display: grid)` for fallbacks, or `(a) and (b)`."),
+   ("Selector support", "`@supports selector(:has(a))` checks whether a selector is understood.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .box { padding: 12px; border-radius: 10px; background: #eaf2ff; margin: 8px 0; }
+  .fallback { display: block; }
+  @supports (display: grid) {
+    .fallback { display: none; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid div { background: #1d5bd8; color: #fff; padding: 12px; border-radius: 8px; text-align: center; }
+  }
+  @supports not (display: grid) { .grid { display: none; } }
+</style>
+<div class="box fallback">Your browser does not support grid.</div>
+<div class="grid"><div>1</div><div>2</div><div>3</div></div>
+<p class="box" id="has">Testing :has() support...</p>
+<script>
+  document.getElementById('has').textContent = CSS.supports('selector(:has(a))') ? ':has() is supported here' : ':has() is not supported here';
+</script>''',
+  "`CSS.supports()` lets JavaScript ask the same question that `@supports` answers in CSS.",
+  [("What does `@supports` check?", ["Whether the browser supports a CSS feature", "Whether the user is online", "Whether the device is a phone", "Whether JavaScript is on"], 0),
+   ("Which test targets browsers that do not support grid?", ["@supports not (display: grid)", "@supports (display: no-grid)", "@media not grid", "@if (!grid)"], 0)]),
+
+L("css-logical-properties", "CSS Logical Properties", "Advanced CSS",
+  "Logical properties use start and end instead of left and right, so layouts adapt to right-to-left languages and vertical writing.",
+  [("Inline and block", "The inline direction is where text flows (horizontal in English). The block direction is where blocks stack (top to bottom in English)."),
+   ("Common properties", "`margin-inline`, `margin-block`, `padding-inline-start`, `border-inline-end`, `inset-inline-start` and `text-align: start` replace their left/right/top/bottom versions.",
+    "<style>\n  .note { padding-inline: 16px; border-inline-start: 4px solid royalblue; }\n</style>"),
+   ("Sizes", "`inline-size` is the logical width and `block-size` the logical height.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .note { padding-inline: 16px; padding-block: 8px; border-inline-start: 5px solid #1d5bd8; background: #eaf2ff; margin-block: 8px; }
+</style>
+<div class="note">English (left to right): the blue bar is on the left.</div>
+<div class="note" dir="rtl">اللغة العربية: the bar moves to the right automatically.</div>''',
+  "Using logical properties from the start means you rarely need extra CSS for right-to-left languages.",
+  [("What replaces `margin-left` when you want direction-aware spacing at the start?", ["margin-inline-start", "margin-start-x", "margin-before", "margin-leading"], 0),
+   ("What does `inline-size` correspond to in horizontal writing?", ["Width", "Height", "Depth", "Margin"], 0)]),
+
+L("css-scroll-snap", "CSS Scroll Snap", "Advanced CSS",
+  "Scroll snap makes a scrolling area stop neatly on items, like a carousel, using only CSS.",
+  [("The container", "Set `scroll-snap-type` on the scroller: axis and strictness, such as `x mandatory`.",
+    "<style>\n  .scroller { overflow-x: auto; scroll-snap-type: x mandatory; display: flex; }\n</style>"),
+   ("The items", "Set `scroll-snap-align` on children (`start`, `center` or `end`). Give them a fixed size so several fit in a row.",
+    "<style>\n  .scroller > div { flex: 0 0 80%; scroll-snap-align: center; }\n</style>"),
+   ("Mandatory or proximity", "`mandatory` always snaps. `proximity` snaps only when the scroll ends near a snap point, which is gentler.")],
+  '''<style>
+  .scroller { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px; border: 2px solid #d5e1f5; border-radius: 10px; }
+  .scroller div { flex: 0 0 75%; height: 110px; border-radius: 10px; scroll-snap-align: center; display: grid; place-items: center; color: #fff; font: 700 24px sans-serif; }
+</style>
+<div class="scroller">
+  <div style="background:#1d5bd8">Slide 1</div>
+  <div style="background:#0b2a63">Slide 2</div>
+  <div style="background:#3b82f6">Slide 3</div>
+  <div style="background:#1747ab">Slide 4</div>
+</div>
+<p>Scroll sideways (touch, trackpad or Shift + wheel) and watch it snap.</p>''',
+  "Add `scroll-padding` to the container if a sticky header would cover the snapped item.",
+  [("Which property turns on snapping for a scroll container?", ["scroll-snap-type", "scroll-lock", "snap-scroll", "overflow-snap"], 0),
+   ("Which property sets where an item aligns when it snaps?", ["scroll-snap-align", "snap-position", "align-scroll", "scroll-to"], 0)]),
+
+L("css-sticky", "CSS Position Sticky Patterns", "Advanced CSS",
+  "`position: sticky` keeps an element in view while its container scrolls, which is perfect for headings and table headers.",
+  [("How sticky works", "A sticky element acts like a normal element until it reaches the offset you set (such as `top: 0`), then it sticks inside its scrolling container.",
+    "<style>\n  h3 { position: sticky; top: 0; background: white; }\n</style>"),
+   ("Common uses", "Section headings in a long list, a table header row, a side table of contents and a navigation bar."),
+   ("When it fails", "Sticky stops working if a parent has `overflow: hidden`, or if you forget the `top` value.")],
+  '''<style>
+  .list { height: 190px; overflow: auto; border: 2px solid #d5e1f5; border-radius: 10px; font: 15px sans-serif; }
+  .list h3 { position: sticky; top: 0; margin: 0; padding: 6px 12px; background: #1d5bd8; color: #fff; }
+  .list p { margin: 0; padding: 12px; border-bottom: 1px solid #eaf2ff; }
+</style>
+<div class="list">
+  <h3>Fruits</h3><p>Apple</p><p>Banana</p><p>Cherry</p>
+  <h3>Vegetables</h3><p>Carrot</p><p>Onion</p><p>Potato</p>
+  <h3>Grains</h3><p>Rice</p><p>Wheat</p><p>Millet</p>
+</div>''',
+  "Scroll inside the box and watch each heading stick to the top until the next one pushes it away.",
+  [("Which `top` value makes a sticky element stick at the very top of its scroller?", ["top: 0", "top: auto", "top: sticky", "top: none"], 0),
+   ("What commonly breaks `position: sticky`?", ["A parent with overflow: hidden", "Using a class name", "Using a colour", "Adding a margin"], 0)]),
+
+L("css-aspect-ratio", "CSS aspect-ratio", "Advanced CSS",
+  "The `aspect-ratio` property keeps an element's width and height in proportion, with no padding hacks.",
+  [("Setting a ratio", "Write the ratio as width / height. Set one dimension and the other follows.",
+    "<style>\n  .video { width: 100%; aspect-ratio: 16 / 9; }\n  .avatar { width: 80px; aspect-ratio: 1; }\n</style>"),
+   ("With images", "`aspect-ratio` with `object-fit: cover` makes a neat grid of thumbnails of different sizes."),
+   ("Reserving space", "Setting a ratio on images and embeds reserves space before they load, which prevents layout shift.")],
+  '''<style>
+  .row { display: flex; gap: 10px; align-items: flex-start; }
+  .row div { color: #fff; font: 700 16px sans-serif; display: grid; place-items: center; border-radius: 10px; }
+  .wide { width: 200px; aspect-ratio: 16 / 9; background: #1d5bd8; }
+  .square { width: 100px; aspect-ratio: 1; background: #0b2a63; }
+  .tall { width: 80px; aspect-ratio: 3 / 4; background: #3b82f6; }
+</style>
+<div class="row"><div class="wide">16 / 9</div><div class="square">1 / 1</div><div class="tall">3 / 4</div></div>''',
+  "Resize the preview. The boxes keep their proportions because only the width is set.",
+  [("Which value gives a square with `aspect-ratio`?", ["1", "0", "2 / 1", "auto"], 0),
+   ("How is a 16 by 9 ratio written?", ["aspect-ratio: 16 / 9", "aspect-ratio: 16x9", "ratio: 16-9", "aspect: (16, 9)"], 0)]),
+
+L("css-clip-path-mask", "CSS clip-path and mask", "Advanced CSS",
+  "`clip-path` cuts an element into a shape, and `mask` fades or hides parts of it using an image or gradient.",
+  [("clip-path shapes", "Use `circle()`, `ellipse()`, `inset()` or `polygon()` to show only part of an element.",
+    "<style>\n  .triangle { clip-path: polygon(50% 0, 100% 100%, 0 100%); }\n</style>"),
+   ("Masks", "A mask uses transparency. `mask-image: linear-gradient(black, transparent)` fades an element out.",
+    "<style>\n  .fade { mask-image: linear-gradient(to bottom, black, transparent); }\n</style>"),
+   ("Note", "Clipped areas also stop receiving clicks. In older Safari versions `mask` needs the `-webkit-` prefix.")],
+  '''<style>
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .shape { width: 110px; height: 110px; background: linear-gradient(135deg, #3b82f6, #0b2a63); }
+  .tri { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .circle { clip-path: circle(50%); }
+  .hex { clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%); }
+  .fade { -webkit-mask-image: linear-gradient(to bottom, #000, transparent); mask-image: linear-gradient(to bottom, #000, transparent); }
+</style>
+<div class="row"><div class="shape tri"></div><div class="shape circle"></div><div class="shape hex"></div><div class="shape fade"></div></div>''',
+  "Tools that generate `polygon()` values by dragging points make complex shapes easy.",
+  [("Which property cuts an element into a shape such as a triangle?", ["clip-path", "shape-cut", "border-shape", "crop"], 0),
+   ("Which CSS function builds a custom clipping outline from points?", ["polygon()", "shape()", "points()", "outline()"], 0),
+   ("What do mask images use to decide what shows?", ["Transparency", "Font size", "Border width", "Z-index"], 0)]),
+
+L("css-blend-backdrop", "CSS Blend Modes and Backdrop Filter", "Advanced CSS",
+  "Blend modes mix an element's colours with what is behind it, and `backdrop-filter` blurs the background behind an element to create a glass effect.",
+  [("mix-blend-mode", "Values such as `multiply`, `screen`, `overlay` and `difference` combine colours the way image editors do.",
+    "<style>\n  .tint { mix-blend-mode: multiply; background: royalblue; }\n</style>"),
+   ("backdrop-filter", "Blur or adjust everything behind a semi-transparent element: `backdrop-filter: blur(8px)`. The element needs a see-through background.",
+    "<style>\n  .glass { background: rgba(255,255,255,.3); backdrop-filter: blur(8px); }\n</style>"),
+   ("Performance", "Both effects cost more to draw. Use them sparingly on large areas.")],
+  '''<style>
+  .stage { position: relative; height: 190px; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #1d5bd8, #7fb0ff 45%, #0b2a63); font: 15px sans-serif; }
+  .dot { position: absolute; border-radius: 50%; }
+  .d1 { width: 90px; height: 90px; background: #ffd479; left: 20px; top: 20px; }
+  .d2 { width: 70px; height: 70px; background: #ff7aa2; left: 150px; top: 90px; }
+  .glass { position: absolute; left: 60px; top: 60px; width: 200px; padding: 14px; color: #fff; background: rgba(255,255,255,.22); border: 1px solid rgba(255,255,255,.5); border-radius: 12px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .blend { position: absolute; right: 16px; top: 16px; width: 80px; height: 80px; border-radius: 50%; background: #fff; mix-blend-mode: difference; }
+</style>
+<div class="stage"><div class="dot d1"></div><div class="dot d2"></div><div class="blend"></div><div class="glass"><b>Glass card</b><br>The circles behind are blurred.</div></div>''',
+  "Always check text contrast over a blurred background. Glass effects can make text hard to read.",
+  [("Which property blurs what is behind an element?", ["backdrop-filter", "filter: back()", "mix-blend-mode", "background-blur"], 0),
+   ("Which property mixes an element's colours with the content behind it?", ["mix-blend-mode", "blend-color", "background-merge", "opacity-mode"], 0)]),
+
+L("css-subgrid", "CSS Subgrid", "Advanced CSS",
+  "Subgrid lets a grid item use the rows or columns of its parent grid, so content in different cards lines up.",
+  [("The problem", "Cards in a grid have titles and text of different lengths, so their inner parts do not line up across cards."),
+   ("The solution", "Make each card span several parent rows and set `grid-template-rows: subgrid`. Now every card shares the same row tracks.",
+    "<style>\n  .card { display: grid; grid-row: span 3; grid-template-rows: subgrid; }\n</style>"),
+   ("Gaps", "A subgrid inherits the parent's tracks, and you can set its own `gap` if you need different spacing.")],
+  '''<style>
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto 1fr auto; gap: 8px 12px; font: 14px sans-serif; }
+  .card { display: grid; grid-row: span 3; grid-template-rows: subgrid; border: 2px solid #d5e1f5; border-radius: 10px; padding: 10px; gap: 6px; }
+  .card h4 { margin: 0; color: #0b2a63; }
+  .card p { margin: 0; }
+  .card a { color: #1d5bd8; font-weight: 600; }
+</style>
+<div class="grid">
+  <div class="card"><h4>Short</h4><p>Brief text.</p><a href="#">Read</a></div>
+  <div class="card"><h4>A much longer title that wraps</h4><p>This card has far more text than the others, yet all three Read links line up on the bottom row.</p><a href="#">Read</a></div>
+  <div class="card"><h4>Medium</h4><p>Some text here.</p><a href="#">Read</a></div>
+</div>''',
+  "Subgrid is supported in all current browsers. Without it, the layout still works, just without alignment.",
+  [("Which value makes a grid item reuse its parent's row tracks?", ["subgrid", "inherit-grid", "parent", "span-all"], 0),
+   ("What does subgrid help with most?", ["Aligning content across separate cards", "Adding animations", "Loading images", "Changing fonts"], 0)]),
+
+L("css-property-rule", "CSS @property and Custom Properties", "Advanced CSS",
+  "`@property` gives a custom property a type, an initial value and inheritance rules, which lets the browser animate it.",
+  [("Registering a property", "Declare the name, `syntax`, `inherits` and `initial-value`.",
+    "<style>\n  @property --angle {\n    syntax: '<angle>';\n    inherits: false;\n    initial-value: 0deg;\n  }\n</style>"),
+   ("Why it matters", "Normal custom properties are just text, so the browser cannot animate between values. A typed property can transition smoothly, for example the angle of a gradient."),
+   ("Fallbacks", "Use `var(--x, fallback)` to provide a default value when a property is not set.")],
+  '''<style>
+  @property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  .ring { --angle: 0deg; width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(from var(--angle), #1d5bd8, #7fb0ff, #0b2a63, #1d5bd8); animation: spin 4s linear infinite; display: grid; place-items: center; }
+  .ring span { width: 84px; height: 84px; border-radius: 50%; background: #fff; display: grid; place-items: center; font: 700 15px sans-serif; color: #0b2a63; }
+  @keyframes spin { to { --angle: 360deg; } }
+</style>
+<div class="ring"><span>@property</span></div>''',
+  "Without `@property`, the gradient would jump from 0 to 360 degrees instead of rotating, because the browser would treat the value as text.",
+  [("What does `@property` add to a custom property?", ["A type and an initial value", "A new colour", "Automatic prefixes", "A media query"], 0),
+   ("Why can a registered `<angle>` property be animated?", ["The browser knows its type", "It uses JavaScript", "It is in a layer", "It has !important"], 0),
+   ("What does `var(--x, red)` do when `--x` is not set?", ["Uses red", "Throws an error", "Uses black", "Uses transparent"], 0)]),
+
+L("css-modern-colors", "CSS Modern Colour Functions", "Advanced CSS",
+  "New colour functions such as `oklch()`, `color-mix()` and relative colours make it easier to build consistent palettes.",
+  [("oklch()", "OKLCH describes a colour by lightness, chroma (strength) and hue. Changing only the hue gives colours that look equally bright.",
+    "<style>\n  .a { color: oklch(60% 0.2 250); }\n</style>"),
+   ("color-mix()", "Blend two colours in a chosen colour space: `color-mix(in oklch, royalblue 70%, white)`.",
+    "<style>\n  .b { background: color-mix(in srgb, #1d5bd8 60%, white); }\n</style>"),
+   ("Relative colours", "`oklch(from var(--brand) calc(l + 0.2) c h)` derives a lighter shade of an existing colour. Support is newer than the other two functions.")],
+  '''<style>
+  :root { --brand: #1d5bd8; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; font: 12px sans-serif; color: #fff; }
+  .row div { width: 90px; height: 60px; border-radius: 8px; display: grid; place-items: center; text-align: center; }
+  .o1 { background: oklch(45% 0.2 260); } .o2 { background: oklch(60% 0.2 260); } .o3 { background: oklch(75% 0.12 260); color: #0b2a63; }
+  .m1 { background: color-mix(in srgb, var(--brand) 70%, white); }
+  .m2 { background: color-mix(in oklch, var(--brand), #ff7aa2); }
+  .r1 { background: oklch(from var(--brand) calc(l + 0.2) c h); color: #0b2a63; }
+</style>
+<div class="row">
+  <div class="o1">oklch dark</div><div class="o2">oklch mid</div><div class="o3">oklch light</div>
+  <div class="m1">mix with white</div><div class="m2">mix two hues</div><div class="r1">relative lighter</div>
+</div>''',
+  "`oklch()` and `color-mix()` work in current browsers. Relative colour syntax is the newest, so give it a fallback colour first.",
+  [("Which colour function describes lightness, chroma and hue?", ["oklch()", "rgb()", "cmyk()", "hex()"], 0),
+   ("Which function blends two colours together?", ["color-mix()", "color-merge()", "blend()", "mix-color()"], 0)]),
+
+L("css-text-wrap-clamp", "CSS Text Wrapping and Typography Features", "Advanced CSS",
+  "Modern CSS can balance headings, clamp text to a few lines and polish numbers, with a single property each.",
+  [("Balanced and pretty wrapping", "`text-wrap: balance` evens out line lengths in headings. `text-wrap: pretty` avoids a single lonely word on the last line.",
+    "<style>\n  h1 { text-wrap: balance; }\n  p { text-wrap: pretty; }\n</style>"),
+   ("Line clamp", "Cut text after a number of lines with an ellipsis.",
+    "<style>\n  .clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }\n</style>"),
+   ("Numbers and underlines", "`font-variant-numeric: tabular-nums` makes digits the same width so columns align. `text-underline-offset` and `text-decoration-thickness` fine-tune underlines.")],
+  '''<style>
+  body { font: 15px/1.5 sans-serif; }
+  .col { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  h3 { margin: 0 0 4px; font-size: 18px; color: #0b2a63; }
+  .normal h3 { text-wrap: wrap; } .bal h3 { text-wrap: balance; }
+  .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .nums { font-variant-numeric: tabular-nums; margin: 0; }
+  a { text-decoration-thickness: 3px; text-underline-offset: 4px; text-decoration-color: #1d5bd8; }
+</style>
+<div class="col">
+  <div class="normal"><h3>Normal wrapping of a long heading here</h3></div>
+  <div class="bal"><h3>Balanced wrapping of a long heading here</h3></div>
+</div>
+<p class="clamp">This paragraph is clamped to two lines. The rest of the text is cut off with an ellipsis, which is handy for card previews that must stay the same height.</p>
+<p class="nums">111<br>999</p>
+<a href="#">A thick, offset underline</a>''',
+  "`text-wrap: balance` is limited to a few lines (about six). It is for headings, not long paragraphs.",
+  [("Which value evens out the line lengths of a heading?", ["text-wrap: balance", "text-align: even", "word-break: equal", "line-fit: auto"], 0),
+   ("Which property makes digits equal in width so numbers line up?", ["font-variant-numeric: tabular-nums", "number-align: fixed", "text-numbers: equal", "font-digits: mono"], 0)]),
+
+L("css-accent-appearance", "CSS accent-color and Form Controls", "Advanced CSS",
+  "Two properties help style form controls: `accent-color` recolours native controls and `appearance` lets you replace their look.",
+  [("accent-color", "One line recolours checkboxes, radio buttons, range sliders and progress bars to match your brand.",
+    "<style>\n  input, progress { accent-color: royalblue; }\n</style>"),
+   ("appearance: none", "Removes the native look so you can draw your own control with borders and pseudo-elements.",
+    "<style>\n  input[type=checkbox] { appearance: none; width: 22px; height: 22px; border: 2px solid royalblue; }\n</style>"),
+   ("Keep it accessible", "Keep a visible `:focus-visible` outline and enough contrast when you replace native controls.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .brand input, .brand progress { accent-color: #1d5bd8; }
+  label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .custom { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid #1d5bd8; border-radius: 6px; display: grid; place-content: center; margin: 0; cursor: pointer; }
+  .custom::after { content: ""; width: 10px; height: 10px; background: #1d5bd8; border-radius: 2px; transform: scale(0); transition: transform .12s; }
+  .custom:checked::after { transform: scale(1); }
+  .custom:focus-visible { outline: 3px solid #cfe0ff; outline-offset: 2px; }
+</style>
+<div class="brand">
+  <label><input type="checkbox" checked> Native checkbox in brand colour</label>
+  <label><input type="radio" checked> Radio</label>
+  <label><input type="range" value="60"> Range</label>
+  <progress value="65" max="100"></progress>
+</div>
+<label><input class="custom" type="checkbox" checked> Custom checkbox (appearance: none)</label>''',
+  "`accent-color` automatically chooses a readable tick colour. It is the easiest way to theme native controls.",
+  [("Which property recolours native checkboxes and sliders?", ["accent-color", "control-color", "input-theme", "tint"], 0),
+   ("What does `appearance: none` do to a form control?", ["Removes the native styling", "Hides the control", "Disables the control", "Makes it bold"], 0)]),
+
+L("css-scroll-driven", "CSS Scroll-driven Animations", "Advanced CSS",
+  "Scroll-driven animations link an animation's progress to scrolling instead of time, with no JavaScript.",
+  [("scroll() timeline", "`animation-timeline: scroll()` makes the animation progress as the nearest scroller moves from top to bottom.",
+    "<style>\n  .bar { animation: grow linear; animation-timeline: scroll(); }\n</style>"),
+   ("view() timeline", "`animation-timeline: view()` runs the animation while an element moves through the viewport, ideal for fade-in on scroll."),
+   ("Support", "Supported in Chromium browsers and being added to others. Always provide a normal fallback with `@supports (animation-timeline: scroll())`.")],
+  '''<style>
+  .scroller { position: relative; height: 170px; overflow: auto; border: 2px solid #d5e1f5; border-radius: 10px; font: 15px sans-serif; }
+  .bar { position: sticky; top: 0; height: 6px; background: #1d5bd8; transform-origin: left; transform: scaleX(1); z-index: 1; }
+  @supports (animation-timeline: scroll()) {
+    .bar { transform: scaleX(0); animation: grow linear both; animation-timeline: scroll(nearest block); }
+  }
+  @keyframes grow { to { transform: scaleX(1); } }
+  .scroller p { padding: 0 12px; margin: 14px 0; }
+</style>
+<div class="scroller">
+  <div class="bar"></div>
+  <p>Scroll this box. The blue bar fills as you scroll.</p><p>Paragraph two.</p><p>Paragraph three.</p><p>Paragraph four.</p><p>Paragraph five.</p><p>Paragraph six.</p><p>The end.</p>
+</div>''',
+  "In a browser without support the bar simply stays full, because of the `@supports` fallback.",
+  [("What drives a scroll-driven animation?", ["Scroll position instead of time", "The system clock", "Mouse clicks", "Network speed"], 0),
+   ("Which property attaches an animation to a scroll timeline?", ["animation-timeline", "scroll-animation", "timeline-link", "animation-scroll"], 0)]),
+
+L("css-print", "CSS Print Styles", "Advanced CSS",
+  "A few rules in `@media print` make pages print cleanly: hide navigation, show link addresses and avoid ugly page breaks.",
+  [("The print media query", "Rules inside `@media print` apply only when the page is printed or saved as a PDF.",
+    "<style>\n  @media print {\n    nav, .no-print { display: none; }\n    body { color: #000; background: #fff; }\n  }\n</style>"),
+   ("Page breaks", "Use `break-inside: avoid` to keep a card together and `break-before: page` to start a new page."),
+   ("Show URLs", "`a[href]::after { content: \" (\" attr(href) \")\"; }` prints the address after each link.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .screen-only { background: #eaf2ff; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+  .print-only { display: none; }
+  @media print {
+    .screen-only { display: none; }
+    .print-only { display: block; }
+    a[href]::after { content: " (" attr(href) ")"; }
+  }
+</style>
+<div class="screen-only">Navigation bar (screen only, hidden when printing)</div>
+<div class="print-only">Printed by TechHub</div>
+<p>Read the <a href="https://example.com/guide">full guide</a>. When printed, the address appears after the link.</p>
+<p id="state"></p>
+<script>
+  document.getElementById('state').textContent = 'Printing right now? ' + matchMedia('print').matches;
+</script>''',
+  "Open your browser's print preview on your own page to test these rules.",
+  [("Which at-rule applies styles only when printing?", ["@media print", "@print", "@page-style", "@media paper"], 0),
+   ("Which property keeps an element from splitting across two printed pages?", ["break-inside: avoid", "page-keep: yes", "no-split: true", "print-whole: on"], 0)]),
+
+L("css-architecture", "CSS Architecture, BEM and Resets", "Advanced CSS",
+  "As projects grow, consistent naming and structure keep CSS manageable. This lesson covers BEM, resets and file organisation.",
+  [("BEM naming", "BEM means Block, Element, Modifier. `.card` is a block, `.card__title` an element of it and `.card--featured` a modifier.",
+    "<style>\n  .card { }\n  .card__title { }\n  .card--featured { }\n</style>"),
+   ("A small reset", "A reset removes inconsistent browser defaults: `*, *::before, *::after { box-sizing: border-box; }` and `body { margin: 0; }`."),
+   ("Organise", "Split styles into base (reset, variables, typography), components (cards, buttons) and utilities. Combine this with `@layer` to control the order.")],
+  '''<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; padding: 12px; font: 15px sans-serif; }
+  .btn { border: 2px solid transparent; padding: 8px 16px; border-radius: 8px; font: inherit; cursor: pointer; }
+  .btn--primary { background: #1d5bd8; color: #fff; }
+  .btn--ghost { background: transparent; color: #1d5bd8; border-color: #1d5bd8; }
+  .card { border: 2px solid #d5e1f5; border-radius: 12px; padding: 14px; max-width: 320px; margin-top: 12px; }
+  .card--featured { border-color: #1d5bd8; background: #eaf2ff; }
+  .card__title { margin: 0 0 6px; color: #0b2a63; }
+</style>
+<button class="btn btn--primary">Primary</button> <button class="btn btn--ghost">Ghost</button>
+<div class="card card--featured"><h3 class="card__title">Featured card</h3><p>Block, element and modifier names show what each class is for.</p></div>''',
+  "Whichever naming system you choose, the key is to use it consistently across the whole project.",
+  [("In BEM, what does `.card--featured` represent?", ["A modifier", "A block", "An element", "A reset"], 0),
+   ("In BEM, what does `.card__title` represent?", ["An element of the card block", "A modifier", "A media query", "A layer"], 0),
+   ("What does a CSS reset commonly set on all elements?", ["box-sizing: border-box", "display: none", "position: fixed", "color: red"], 0)]),
+
+L("css-font-face", "CSS @font-face and Variable Fonts", "Advanced CSS",
+  "`@font-face` loads your own fonts, and variable fonts pack many weights and widths into one file.",
+  [("Loading a font", "Give the font a name and point to its files. Prefer the `woff2` format, which is small and widely supported.",
+    "<style>\n  @font-face {\n    font-family: 'Brand';\n    src: url('brand.woff2') format('woff2');\n    font-display: swap;\n  }\n</style>"),
+   ("font-display", "`font-display: swap` shows text immediately in a fallback font and swaps when your font arrives, avoiding invisible text."),
+   ("Variable fonts", "A variable font exposes axes such as weight and width. Use a range in `@font-face` (`font-weight: 100 900`) and then any value in between, like `font-weight: 650`.")],
+  '''<style>
+  @font-face { font-family: 'LocalStack'; src: local('Arial'), local('Helvetica'), local('Liberation Sans'); font-display: swap; }
+  body { font: 18px/1.5 'LocalStack', system-ui, sans-serif; }
+  .w { margin: 2px 0; }
+  .w1 { font-weight: 300; } .w2 { font-weight: 400; } .w3 { font-weight: 600; } .w4 { font-weight: 800; }
+  code { font-size: 14px; background: #eaf2ff; padding: 1px 6px; border-radius: 4px; }
+</style>
+<p>This text uses a font declared with <code>@font-face</code> (here it reuses a font already on your device).</p>
+<p class="w w1">Weight 300</p><p class="w w2">Weight 400</p><p class="w w3">Weight 600</p><p class="w w4">Weight 800</p>''',
+  "This preview cannot load font files from the internet, so the example reuses installed fonts with `local()`. On your own site use `url()` with a `woff2` file.",
+  [("Which `font-display` value shows fallback text first and swaps in the web font later?", ["swap", "block", "hide", "later"], 0),
+   ("Which font file format is recommended for the web?", ["woff2", "bmp", "pdf", "mp3"], 0),
+   ("What is a variable font?", ["One file with adjustable axes such as weight and width", "A font that changes at random", "A font only for numbers", "A font stored in a variable"], 0)]),
+
+L("css-performance", "CSS Performance: contain and content-visibility", "Advanced CSS",
+  "Some properties tell the browser what it can skip, so large pages render faster.",
+  [("contain", "`contain: layout paint` promises that an element's insides do not affect the outside. The browser can then skip re-checking the rest of the page when it changes."),
+   ("content-visibility", "`content-visibility: auto` skips drawing off-screen sections until they are near the view. Pair it with `contain-intrinsic-size` so the scrollbar stays steady.",
+    "<style>\n  .section { content-visibility: auto; contain-intrinsic-size: auto 400px; }\n</style>"),
+   ("will-change", "`will-change: transform` warns the browser that something will animate. Use it sparingly and remove it when done, because it uses memory.")],
+  '''<style>
+  body { font: 15px sans-serif; }
+  .sec { content-visibility: auto; contain-intrinsic-size: auto 70px; margin: 6px 0; padding: 14px; border-radius: 10px; background: #eaf2ff; border-left: 5px solid #1d5bd8; }
+  .sec h4 { margin: 0; color: #0b2a63; }
+  .lift { will-change: transform; transition: transform .2s; display: inline-block; padding: 8px 14px; background: #1d5bd8; color: #fff; border-radius: 8px; }
+  .lift:hover { transform: translateY(-4px); }
+</style>
+<span class="lift">Hover me (will-change)</span>
+<div class="sec"><h4>Section 1</h4>Rendered when near the view.</div>
+<div class="sec"><h4>Section 2</h4>content-visibility: auto skips off-screen work.</div>
+<div class="sec"><h4>Section 3</h4>contain-intrinsic-size reserves space.</div>
+<div class="sec"><h4>Section 4</h4>The scrollbar stays steady.</div>''',
+  "Measure before optimising. Use your browser's Performance tool to see whether these properties actually help your page.",
+  [("Which property skips rendering of off-screen sections until needed?", ["content-visibility: auto", "render: lazy", "paint: later", "display: defer"], 0),
+   ("What does `contain-intrinsic-size` provide?", ["A placeholder size for skipped content", "A border size", "A font size", "A grid gap"], 0)]),
+
+L("css-writing-mode", "CSS Writing Modes and RTL", "Advanced CSS",
+  "CSS supports languages that read right to left and text that runs vertically, using `direction` and `writing-mode`.",
+  [("Right to left", "Set `dir=\"rtl\"` in HTML (preferred) or `direction: rtl` in CSS. Combined with logical properties, layouts mirror themselves."),
+   ("Vertical text", "`writing-mode: vertical-rl` makes lines run top to bottom and stack from right to left, as in traditional Japanese and Chinese.",
+    "<style>\n  .side { writing-mode: vertical-rl; }\n</style>"),
+   ("text-orientation", "`text-orientation: upright` keeps each character upright in vertical text. Vertical text is also used for decorative labels.")],
+  '''<style>
+  body { font: 16px sans-serif; }
+  .row { display: flex; gap: 20px; align-items: flex-start; }
+  .vert { writing-mode: vertical-rl; background: #1d5bd8; color: #fff; padding: 10px 8px; border-radius: 8px; letter-spacing: 2px; }
+  .upright { writing-mode: vertical-rl; text-orientation: upright; background: #0b2a63; color: #fff; padding: 10px 8px; border-radius: 8px; }
+  .rtl { direction: rtl; border-inline-start: 5px solid #1d5bd8; padding-inline: 12px; background: #eaf2ff; }
+</style>
+<div class="row"><div class="vert">Vertical text</div><div class="upright">UPRIGHT</div>
+  <div><p>Left to right: the bar is on the left.</p><p class="rtl">Right to left: the bar is on the right.</p></div></div>''',
+  "Use the `lang` and `dir` attributes in HTML so screen readers and browsers know the language and direction.",
+  [("Which property makes text run vertically?", ["writing-mode", "text-flow", "direction: down", "rotate-text"], 0),
+   ("Which HTML attribute sets right-to-left text direction?", ["dir=\"rtl\"", "flow=\"rtl\"", "lang=\"rtl\"", "align=\"right\""], 0)]),
+]
+
 # ------------------------------------------------------------------------------------
 # Shuffle each question's options once (fixed seed) so the right answer is not always first.
 import random as _random

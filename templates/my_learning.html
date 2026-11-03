@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}My learning | {{ site_name }}{% endblock %}
+{% block plain %}
+<section class="intro slim"><div class="wrap">
+  <h1>Welcome back, {{ user.name }}</h1>
+  <p class="lead">Your progress is saved to your account. Follow today's plan, then come back tomorrow to keep your streak.</p>
+</div></section>
+<div class="dash">
+  <div class="dash-main">
+    <section class="dcard">
+      <h2>Today's goal</h2>
+      <p class="small">{{ done_today }} of {{ user.pace }} lessons finished today.</p>
+      <div class="bar"><i style="width: {{ [100, (done_today / user.pace * 100)|round|int]|min }}%"></i></div>
+      {% if plan %}
+      <ul class="daylist">{% for l in plan[0].lessons %}<li><span><b>{{ l.title }}</b><small>{{ l.module|upper if l.module != 'js' else 'JavaScript' }} &middot; {{ l.group }}</small></span><a class="btn small" href="{{ url_for('lesson', mod=l.module, slug=l.slug) }}">Start</a></li>{% endfor %}</ul>
+      {% else %}<p>You have finished every lesson. Try the <a href="{{ url_for('projects') }}">projects</a> and <a href="{{ url_for('challenges') }}">challenges</a> next.</p>{% endif %}
+    </section>
+    {% if plan|length > 1 %}
+    <section class="dcard">
+      <h2>Your next days</h2>
+      <p class="small">At {{ user.pace }} lessons a day you will finish in about {{ days_left }} days.</p>
+      <div class="plan">{% for d in plan[1:] %}<div class="pday"><b>Day {{ d.day }}</b>{% for l in d.lessons %}<a href="{{ url_for('lesson', mod=l.module, slug=l.slug) }}">{{ l.title }}</a>{% endfor %}</div>{% endfor %}</div>
+    </section>
+    {% endif %}
+    {% if recent %}
+    <section class="dcard"><h2>Recently finished</h2><ul class="plainlist">{% for l in recent %}<li><a href="{{ url_for('lesson', mod=l.module, slug=l.slug) }}">{{ l.title }}</a></li>{% endfor %}</ul></section>
+    {% endif %}
+  </div>
+  <aside class="dash-side">
+    <section class="dcard stats2">
+      <div><b>{{ streak }}</b><span>day streak</span></div>
+      <div><b>{{ done_n }}</b><span>lessons done</span></div>
+      <div><b>{{ total - done_n }}</b><span>to go</span></div>
+    </section>
+    <section class="dcard"><h2>This week</h2>
+      <div class="week">{% for d in week %}<span class="{{ 'on' if d.on }} {{ 'today' if d.today }}"><i></i>{{ d.label }}</span>{% endfor %}</div></section>
+    <section class="dcard"><h2>By tutorial</h2>
+      {% for r in mods %}<div class="mprog"><span><a href="{{ url_for('module', mod=r.m.slug) }}">{{ r.m.title }}</a><small>{{ r.done }} / {{ r.total }}</small></span><div class="bar"><i style="width: {{ (r.done / r.total * 100)|round|int }}%"></i></div></div>{% endfor %}</section>
+    <section class="dcard"><h2>Daily pace</h2>
+      <label class="small" for="pace">Lessons per day</label>
+      <select id="pace" data-pace>{% for n in (1, 2, 3, 5, 8) %}<option value="{{ n }}" {{ 'selected' if n == user.pace }}>{{ n }}</option>{% endfor %}</select></section>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, shell with context %}
+{% block title %}Box model visualizer | {{ site_name }}{% endblock %}
+{% block description %}See how margin, border, padding and content size add up in the CSS box model.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'Box model visualizer', 'Every element is a box: content, then padding, then border, then margin. Move the sliders to see the sizes.', tabs=ttabs, active='tools', icon='box') }}
+  <div class="tool" data-tool="box-model">
+    <div class="controls">
+      <label>width: <output data-out="width">200px</output><input type="range" min="60" max="300" value="200" data-range="width"></label>
+      <label>height: <output data-out="height">80px</output><input type="range" min="30" max="160" value="80" data-range="height"></label>
+      <label>padding: <output data-out="padding">20px</output><input type="range" min="0" max="60" value="20" data-range="padding"></label>
+      <label>border: <output data-out="border">6px</output><input type="range" min="0" max="20" value="6" data-range="border"></label>
+      <label>margin: <output data-out="margin">24px</output><input type="range" min="0" max="60" value="24" data-range="margin"></label>
+      <label>box-sizing<select data-prop="box-sizing"><option>content-box</option><option>border-box</option></select></label>
+    </div>
+    <div class="stage"><div class="bm-margin" data-bm="margin"><div class="bm-border" data-bm="border"><div class="bm-padding" data-bm="padding"><div class="bm-content" data-bm="content">content</div></div></div></div></div>
+    <p class="bm-total" data-total></p>
+    <div class="codebox"><div class="cb-bar"><span>CSS</span><button type="button" data-copy>Copy</button></div><pre class="code"><code data-css></code></pre></div>
+  </div>
+  <p>Learn more in the <a href="{{ url_for('lesson', mod='css', slug='css-box-model') }}">Box Model lesson</a>.</p>
+{% endcall %}
+<script src="{{ url_for('static', filename='js/tools.js') }}"></script>
+{% endblock %}

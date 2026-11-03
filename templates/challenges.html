@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Coding challenges | {{ site_name }}{% endblock %}
+{% block description %}Write real HTML, CSS and JavaScript and get instant feedback. 45 auto-checked challenges from beginner to advanced.{% endblock %}
+{% block plain %}
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', 'Coding challenges', 'Write the code yourself and press Check. Your page is tested straight away and you see which checks passed.', tabs=ptabs, active='challenges', stats=[(challenges|length, 'Challenges'), (modules|length, 'Languages'), (3, 'Levels')], icon='target') }}
+{% for m in modules %}
+  <section class="x-section" id="{{ m.slug }}">
+    <h2 class="x-sec-title"><i class="lg lg-{{ m.slug }}">{{ 'JS' if m.slug == 'js' else m.title }}</i>{{ m.title }} challenges<small>{{ challenges|selectattr('module', 'equalto', m.slug)|list|length }} total</small></h2>
+    <div class="x-levels">
+    {% for key, name in levels %}
+      <div class="x-lvl {{ key }}">
+        <h3><i class="dot"></i>{{ name }}</h3>
+        <ul>
+        {% for c in challenges if c.module == m.slug and c.level == key %}
+          <li><a href="{{ url_for('challenge', slug=c.slug) }}"><span class="x-lvl-name">{{ c.title }}</span><span class="x-lvl-meta">{{ c.tests|length }} checks</span>{{ ico('arrow') }}</a></li>
+        {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+{% endcall %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Web development glossary | {{ site_name }}{% endblock %}
+{% block description %}Plain-English definitions of HTML, CSS, JavaScript and general web development terms.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'Glossary', 'What the words mean, in plain English.', tabs=ttabs, active='gloss', stats=[(terms|length, 'Terms')], icon='abc') }}
+  <div class="x-reftools">
+    <div class="x-search"><span class="x-search-ico">{{ ico('search') }}</span><label class="sr-only" for="gl">Filter terms</label><input id="gl" type="search" placeholder="Filter terms" autocomplete="off"></div>
+    <div class="ref-jump x-jump">{% for L in letters %}<a href="#L{{ L }}">{{ L }}</a>{% endfor %}</div>
+  </div>
+  <dl class="gloss x-gloss" id="gloss">
+  {% for t in terms %}
+    {% if loop.first or t.term[0]|upper != loop.previtem.term[0]|upper %}<h2 class="gl-letter" id="L{{ t.term[0]|upper }}">{{ t.term[0]|upper }}</h2>{% endif %}
+    <div class="gl-item"><dt>{{ t.term }} {% if t.module != 'general' %}<small class="lg lg-{{ t.module }}">{{ t.module|upper if t.module == 'js' else t.module|upper }}</small>{% endif %}</dt><dd>{{ t.definition|rich }}{% if t.lesson and t.lesson in lessons %} <a href="{{ url_for('lesson', mod=lessons[t.lesson].module, slug=t.lesson) }}">Read the lesson</a>{% endif %}</dd></div>
+  {% endfor %}
+  </dl>
+  <p class="none" id="gnone" hidden>No terms match your filter.</p>
+{% endcall %}
+{% endblock %}

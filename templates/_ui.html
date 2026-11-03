@@ -1,0 +1,88 @@
+{# Shared UI pieces for the section pages (Reference, Practice, Tools, Learning path). #}
+
+{% macro ico(name) -%}
+{%- if name == 'book' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6M9 11h6"/></svg>
+{%- elif name == 'target' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg>
+{%- elif name == 'code' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>
+{%- elif name == 'layers' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/></svg>
+{%- elif name == 'check' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+{%- elif name == 'help' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17h.01"/></svg>
+{%- elif name == 'flex' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8v8M12 8v5M16 8v8"/></svg>
+{%- elif name == 'grid' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
+{%- elif name == 'box' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+{%- elif name == 'file' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>
+{%- elif name == 'abc' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l3.5-10L11 17M5.3 13.5h4.4M14 7v10M14 7h3a2.5 2.5 0 0 1 0 5h-3M14 12h3.4a2.5 2.5 0 0 1 0 5H14"/></svg>
+{%- elif name == 'route' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6.5"/></svg>
+{%- elif name == 'clock' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+{%- elif name == 'arrow' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+{%- elif name == 'play' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+{%- elif name == 'search' -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+{%- else -%}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+{%- endif -%}
+{%- endmacro %}
+
+{# Floating-badge laptop art, same language as the home page banner. #}
+{% macro art(mid, a, b, c, size=46) -%}
+<svg class="banner-art" viewBox="0 0 460 300" aria-hidden="true">
+  <ellipse cx="230" cy="262" rx="190" ry="26" fill="#2554F0" opacity=".12"/>
+  <g transform="translate(110 70)">
+    <rect x="0" y="0" width="240" height="150" rx="12" fill="#12255F"/>
+    <rect x="10" y="10" width="220" height="130" rx="6" fill="#0B1740"/>
+    <circle cx="22" cy="22" r="3" fill="#FF7A6B"/><circle cx="33" cy="22" r="3" fill="#FFC857"/><circle cx="44" cy="22" r="3" fill="#5EDC9A"/>
+    <text x="120" y="{{ 70 + size // 2 }}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="{{ size }}" font-weight="700" fill="#7FA6FF">{{ mid }}</text>
+    <rect x="24" y="112" width="70" height="5" rx="2.5" fill="#2F4A9A"/><rect x="100" y="112" width="50" height="5" rx="2.5" fill="#4F7BFF"/><rect x="24" y="124" width="40" height="5" rx="2.5" fill="#4F7BFF"/><rect x="70" y="124" width="80" height="5" rx="2.5" fill="#2F4A9A"/>
+    <path d="M-18 150h276l-12 16a8 8 0 0 1-6 3H-0a8 8 0 0 1-6-3z" fill="#C9D6F5"/>
+    <rect x="90" y="150" width="60" height="5" rx="2.5" fill="#A9BCEB"/>
+  </g>
+  <g font-family="JetBrains Mono, monospace" font-weight="700" text-anchor="middle">
+    <g transform="translate(60 34) rotate(-10)"><rect width="76" height="76" rx="18" fill="#FF7A45"/><text x="38" y="45" font-size="17" fill="#fff">{{ a }}</text></g>
+    <g transform="translate(318 18) rotate(8)"><rect width="76" height="76" rx="18" fill="#2554F0"/><text x="38" y="45" font-size="17" fill="#fff">{{ b }}</text></g>
+    <g transform="translate(362 124) rotate(-6)"><rect width="70" height="70" rx="16" fill="#FFC93C"/><text x="35" y="42" font-size="17" fill="#2B2200">{{ c }}</text></g>
+  </g>
+  <path d="M44 150l-14-6M46 168l-16 2M52 132l-10-12" stroke="#2554F0" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+  <path d="M410 70l12-8M416 88l16 0" stroke="#FF7A45" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+</svg>
+{%- endmacro %}
+
+{# Banner header, same as the home page. tabs = [(key, label, href)] #}
+{% macro phead(eyebrow, title, lead, tabs=None, active=None, stats=None, icon='book') %}
+{% set arts = {'file': ('&lt;tag&gt;', 'HTML', 'CSS', 'JS', 30), 'target': ('&#123; &#125;', 'Quiz', 'Code', 'Build', 46), 'layers': ('&#123; &#125;', 'Plan', 'Code', 'Ship', 46), 'help': ('?', 'HTML', 'CSS', 'JS', 56), 'code': ('&lt;/&gt;', 'HTML', 'CSS', 'JS', 46), 'flex': ('flex', 'Flex', 'Grid', 'Box', 34), 'grid': ('grid', 'Flex', 'Grid', 'Box', 34), 'box': ('box', 'Flex', 'Grid', 'Box', 34), 'abc': ('A-Z', 'HTML', 'CSS', 'JS', 40), 'route': ('1 2 3', 'HTML', 'CSS', 'JS', 40)} %}
+{% set a = arts.get(icon, arts['code']) %}
+<section class="banner x-banner">
+  <div class="banner-copy">
+    <p class="x-crumb"><a href="{{ url_for('home') }}">Home</a><span aria-hidden="true">/</span><span>{{ eyebrow }}</span></p>
+    <h1>{{ title }}</h1>
+    <p>{{ lead }}</p>
+    {% if stats %}<p class="x-meta">{% for n, label in stats %}<span><b>{{ n }}</b> {{ label }}</span>{% endfor %}</p>{% endif %}
+    {% if tabs %}<nav class="actions x-pilltabs" aria-label="{{ eyebrow }} sections">{% for key, label, href in tabs %}<a class="btn small {{ '' if key == active else 'ghost' }}" href="{{ href }}" {% if key == active %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>{% endif %}
+  </div>
+  {{ art(a[0]|safe, a[1], a[2], a[3], a[4]) }}
+</section>
+{% endmacro %}
+
+{# Page layout identical to the home page: main column plus a right rail. links = [(label, href)] #}
+{% macro shell(rail_title, links) %}
+{% set n_all = modules|map(attribute='lessons')|map('length')|sum %}
+<div class="home">
+ <div class="home-main">{{ caller() }}</div>
+ <aside class="rail">
+  <section class="rcard">
+    <h3>{{ rail_title }}</h3>
+    <ul class="rlist">
+    {% if links == 'refs' %}{% for r in refs %}<li><a href="{{ url_for('reference', slug=r.slug) }}">{{ r.title }}</a></li>{% endfor %}
+    {% elif links == 'sheets' %}{% for o in sheets %}<li><a href="{{ url_for('cheatsheet', slug=o.slug) }}" {% if o.slug == s.slug %}class="on" aria-current="page"{% endif %}>{{ o.title }}</a></li>{% endfor %}
+    {% elif links == 'stages' %}{% for s in stages %}<li><a href="#stage{{ loop.index }}">{{ loop.index }}. {{ s.title }}</a></li>{% endfor %}
+    {% else %}{% for label, href in links %}<li><a href="{{ href }}" {% if href == request.path %}class="on" aria-current="page"{% endif %}>{{ label }}</a></li>{% endfor %}{% endif %}
+    </ul>
+  </section>
+  <section class="rcard prog" data-progress data-total="{{ n_all }}">
+    <h3>Track your progress</h3>
+    <div class="ring" data-ring><span><b data-pct>0%</b></span></div>
+    <p class="small"><span data-count>0</span> of <span data-of>{{ n_all }}</span> lessons finished.</p>
+    {% if user %}<a class="btn small" href="{{ url_for('my_learning') }}">Open my learning</a>
+    {% else %}<p class="small">Log in to keep your progress on every device and get a daily plan.</p>
+    <p class="actions"><a class="btn small" href="{{ url_for('signup') }}">Sign up free</a><a class="btn ghost small" href="{{ url_for('login') }}">Log in</a></p>{% endif %}
+  </section>
+ </aside>
+</div>
+{% endmacro %}

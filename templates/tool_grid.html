@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, shell with context %}
+{% block title %}Grid playground | {{ site_name }}{% endblock %}
+{% block description %}Set columns, rows, gaps and alignment for a CSS grid and copy the CSS.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'Grid playground', 'Describe the columns and rows, then see where the items land.', tabs=ttabs, active='tools', icon='grid') }}
+  <div class="tool" data-tool="grid">
+    <div class="controls">
+      <label>grid-template-columns<input type="text" value="repeat(3, 1fr)" data-text="columns" spellcheck="false"></label>
+      <label>grid-template-rows<input type="text" value="auto" data-text="rows" spellcheck="false"></label>
+      <label>justify-items<select data-prop="justify-items"><option>stretch</option><option>start</option><option>center</option><option>end</option></select></label>
+      <label>align-items<select data-prop="align-items"><option>stretch</option><option>start</option><option>center</option><option>end</option></select></label>
+      <label>gap: <output data-out="gap">12px</output><input type="range" min="0" max="48" value="12" data-range="gap"></label>
+      <label>Items: <output data-out="count">6</output><input type="range" min="1" max="12" value="6" data-range="count"></label>
+    </div>
+    <div class="stage"><div class="demo-box" data-stage></div></div>
+    <div class="codebox"><div class="cb-bar"><span>CSS</span><button type="button" data-copy>Copy</button></div><pre class="code"><code data-css></code></pre></div>
+  </div>
+  <p>Try values such as <code class="i">1fr 2fr</code>, <code class="i">200px 1fr</code> or <code class="i">repeat(auto-fit, minmax(120px, 1fr))</code>. Learn more in the <a href="{{ url_for('lesson', mod='css', slug='css-grid') }}">Grid lesson</a>.</p>
+{% endcall %}
+<script src="{{ url_for('static', filename='js/tools.js') }}"></script>
+{% endblock %}

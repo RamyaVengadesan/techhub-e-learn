@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Cheat sheets | {{ site_name }}{% endblock %}
+{% block description %}Printable one-page cheat sheets for HTML, CSS, flexbox, grid and JavaScript.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'Cheat sheets', 'Short, printable summaries to keep next to you while you code.', tabs=ttabs, active='sheets', stats=[(sheets|length, 'Sheets')], icon='file') }}
+<div class="x-grid">
+{% for s in sheets %}<a class="x-card t-{{ s.module }}" href="{{ url_for('cheatsheet', slug=s.slug) }}"><span class="x-card-ico">{{ ico('file') }}</span><b class="x-card-title">{{ s.title }}</b><span class="x-card-desc">{{ s.intro }}</span><span class="x-card-meta"><em>{{ s.sections|length }} sections</em><span class="x-go">{{ ico('arrow') }}</span></span></a>{% endfor %}
+</div>{% endcall %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Guided projects | {{ site_name }}{% endblock %}
+{% block description %}Build real web projects step by step: a profile page, landing page, navbar, to-do list, calculator and a memory game.{% endblock %}
+{% block plain %}
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', 'Guided projects', 'Lessons teach the pieces. Projects teach you to put them together. Each one has clear steps and a finished version to compare with.', tabs=ptabs, active='projects', stats=[(projects|length, 'Projects')], icon='layers') }}
+  {% for key, name in levels %}
+  {% set group = projects|selectattr('level', 'equalto', key)|list %}
+  {% if group %}
+  <section class="x-section">
+    <h2 class="x-sec-title"><i class="dot lvl-{{ key }}"></i>{{ name }}<small>{{ group|length }} project{{ '' if group|length == 1 else 's' }}</small></h2>
+    <div class="x-grid">
+    {% for p in group %}
+      <a class="x-card lvl-{{ key }}" href="{{ url_for('project', slug=p.slug) }}">
+        <span class="x-card-ico">{{ ico('layers') }}</span>
+        <b class="x-card-title">{{ p.title }}</b>
+        <span class="x-card-desc">{{ p.summary }}</span>
+        <span class="x-skills">{% for s in p.skills %}<em>{{ s }}</em>{% endfor %}</span>
+        <span class="x-card-meta"><em>{{ ico('clock') }}{{ p.minutes }} min</em><em>{{ p.steps|length }} steps</em><span class="x-go">{{ ico('arrow') }}</span></span>
+      </a>
+    {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+  {% endfor %}
+{% endcall %}
+{% endblock %}

@@ -1080,8 +1080,19 @@ LESSONS += [
          example='''<canvas id="myCanvas" width="300" height="120" style="border: 2px solid royalblue;">
   Your browser does not support the canvas element.
 </canvas>
-<p>The canvas above is empty because scripts are switched off in this editor. Copy the drawing code from the lesson into your own file to see the shapes.</p>''',
-         tip="Set the size with the `width` and `height` attributes. Sizing a canvas with CSS only stretches the picture.",
+<script>
+  const ctx = document.getElementById('myCanvas').getContext('2d');
+  ctx.fillStyle = '#1d5bd8';
+  ctx.fillRect(20, 20, 120, 60);
+  ctx.fillStyle = '#0b2a63';
+  ctx.beginPath();
+  ctx.arc(210, 50, 30, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#0b2a63';
+  ctx.font = '18px sans-serif';
+  ctx.fillText('Hello, canvas!', 20, 108);
+</script>''',
+         tip="Change the colours and numbers, then press Run. Sizing a canvas with CSS only stretches the picture, so set `width` and `height` in the attributes.",
          exercise=[
              dict(q="Which element creates a drawing area controlled by JavaScript?", options=["<draw>", "<canvas>", "<svg-area>", "<paint>"], answer=1),
              dict(q="Which method gives you the tools for 2D drawing on a canvas?", options=["getContext(\"2d\")", "getDrawing()", "startPaint()", "createBrush()"], answer=0),
@@ -1195,6 +1206,413 @@ LESSONS += [
 ]
 
 
+# ---------------------------------------------------------------- Advanced HTML (added)
+from urllib.parse import quote as _quote
+
+
+def _svg(w, h, color, label):
+    s = (f"<svg xmlns='http://www.w3.org/2000/svg' width='{w}' height='{h}'><rect width='{w}' height='{h}' fill='{color}'/>"
+         f"<text x='{w // 2}' y='{h // 2 + 8}' fill='white' font-size='24' text-anchor='middle' font-family='sans-serif'>{label}</text></svg>")
+    return "data:image/svg+xml," + _quote(s, safe="")
+
+
+def _X(slug, title, intro, sections, example, tip, exercise):
+    return dict(slug=slug, title=title, group="Advanced HTML", intro=intro,
+                sections=[dict(h=s[0], p=s[1], **({"code": s[2]} if len(s) > 2 else {})) for s in sections],
+                example=example, tip=tip,
+                exercise=[dict(q=q, options=o, answer=a) for q, o, a in exercise])
+
+
+_ADV_HTML = [
+    _X("data-attributes", "HTML Data Attributes",
+       "Custom `data-*` attributes let you store extra information on any element, ready for CSS or JavaScript to use.",
+       [("Writing data attributes", "Any attribute that starts with `data-` is yours to define. The name after the dash is up to you, in lowercase.",
+         '<li data-id="12" data-role="admin">Asha</li>'),
+        ("Reading them in JavaScript", "The `dataset` property exposes them. `data-user-name` becomes `dataset.userName` (camelCase).",
+         "<script>\n  const li = document.querySelector('li');\n  console.log(li.dataset.id, li.dataset.role);\n</script>"),
+        ("Using them in CSS", "Attribute selectors can style by data value: `li[data-role=\"admin\"] { font-weight: bold; }`. Do not store secrets in them, because anyone can read the page source.")],
+       '''<style>
+  li { cursor: pointer; margin: 4px 0; }
+  li[data-role="admin"] { font-weight: 700; color: #1d5bd8; }
+</style>
+<ul>
+  <li data-id="12" data-role="admin">Asha</li>
+  <li data-id="47" data-role="editor">Ravi</li>
+</ul>
+<p id="out">Click a name.</p>
+<script>
+  document.querySelectorAll('li').forEach(li => li.addEventListener('click', () => {
+    document.getElementById('out').textContent = 'ID ' + li.dataset.id + ', role ' + li.dataset.role;
+    console.log(li.dataset);
+  }));
+</script>''',
+       "Use data attributes for small bits of state or configuration. For real content that people must read, use normal elements.",
+       [("Which attribute prefix marks a custom attribute you define yourself?", ["data-", "custom-", "x-", "user-"], 0),
+        ("How do you read `data-user-name` from JavaScript?", ["element.dataset.userName", "element.data.user-name", "element.getData('user')", "element.userName"], 0),
+        ("Which CSS selector matches elements with a data-role of admin?", ["[data-role=\"admin\"]", "#data-role.admin", ":data(role=admin)", "data.role(admin)"], 0)]),
+
+    _X("details-summary", "HTML Details and Summary",
+       "The `<details>` element creates a show and hide widget with no JavaScript. The `<summary>` is the part you click.",
+       [("Basic usage", "Put a `<summary>` first, then any content. The content is hidden until the user opens it.",
+         "<details>\n  <summary>Shipping information</summary>\n  <p>Orders ship within two days.</p>\n</details>"),
+        ("Open by default", "Add the boolean attribute `open` to start expanded. Browsers also let people search inside closed details."),
+        ("Accordions", "Give several `<details>` the same `name` attribute and only one can be open at a time (a modern feature in current browsers).")],
+       '''<style>
+  details { border: 1px solid #d5e1f5; border-radius: 8px; padding: 8px 12px; margin: 8px 0; }
+  summary { cursor: pointer; font-weight: 600; color: #0b2a63; }
+</style>
+<details open name="faq">
+  <summary>What is HTML?</summary>
+  <p>The language that gives web pages their structure.</p>
+</details>
+<details name="faq">
+  <summary>What is CSS?</summary>
+  <p>The language that styles those pages.</p>
+</details>''',
+       "Grouping with the `name` attribute is newer. Older browsers simply let several items stay open, which is still fine.",
+       [("Which element is the clickable heading inside `<details>`?", ["<summary>", "<legend>", "<caption>", "<header>"], 0),
+        ("Which attribute makes a `<details>` element start expanded?", ["open", "expanded", "show", "visible"], 0)]),
+
+    _X("dialog", "HTML Dialog",
+       "The `<dialog>` element is a built-in pop-up window. The browser handles focus, the Escape key and the backdrop for you.",
+       [("Showing a dialog", "Call `dialog.show()` for a normal dialog or `dialog.showModal()` for a modal that blocks the rest of the page. Call `close()` to hide it.",
+         "<script>\n  document.getElementById('dlg').showModal();\n</script>"),
+        ("Closing with a form", "A form with `method=\"dialog\"` closes the dialog when submitted, and its button value becomes `dialog.returnValue`.",
+         '<dialog id="dlg">\n  <form method="dialog"><button>Close</button></form>\n</dialog>'),
+        ("Styling", "Style the dim background with the `::backdrop` pseudo-element.")],
+       '''<style>
+  dialog { border: 0; border-radius: 12px; padding: 18px 22px; box-shadow: 0 10px 30px rgba(11,42,99,.35); }
+  dialog::backdrop { background: rgba(11,42,99,.5); }
+</style>
+<button id="open">Open the dialog</button>
+<dialog id="dlg">
+  <h3 style="margin-top:0">Hello!</h3>
+  <p>This is a modal dialog. Press Escape or the button.</p>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+<script>
+  document.getElementById('open').addEventListener('click', () => document.getElementById('dlg').showModal());
+  document.getElementById('dlg').addEventListener('close', () => console.log('dialog closed'));
+</script>''',
+       "Prefer `<dialog>` to building a pop-up from `<div>` elements. You get focus trapping and Escape handling for free.",
+       [("Which method opens a `<dialog>` as a modal?", ["showModal()", "open()", "popup()", "display()"], 0),
+        ("Which pseudo-element styles the dimmed area behind a modal dialog?", ["::backdrop", "::overlay", "::before-dialog", "::screen"], 0),
+        ("Which form method closes a dialog without leaving the page?", ["dialog", "close", "post", "hide"], 0)]),
+
+    _X("progress-meter", "HTML Progress and Meter",
+       "`<progress>` shows how far a task has got. `<meter>` shows a value within a known range, such as disk space.",
+       [("The progress element", "Use `value` and `max`. Leave out `value` to show an indeterminate (busy) bar.",
+         '<progress value="70" max="100">70%</progress>'),
+        ("The meter element", "Use `min`, `max`, `value`, and optionally `low`, `high` and `optimum`. Browsers colour the bar green, yellow or red.",
+         '<meter min="0" max="100" low="30" high="80" optimum="90" value="55"></meter>'),
+        ("Which one to use", "Use `<progress>` for a task moving toward completion. Use `<meter>` for a measurement that is not a task.")],
+       '''<p><label for="up">Upload:</label> <progress id="up" value="70" max="100">70%</progress> 70%</p>
+<p><label for="d">Disk used:</label> <meter id="d" min="0" max="100" low="60" high="85" optimum="20" value="92">92%</meter> 92%</p>
+<p><label for="b">Battery:</label> <meter id="b" min="0" max="100" low="20" high="60" optimum="100" value="75">75%</meter> 75%</p>
+<p>Busy: <progress></progress></p>''',
+       "Always add a text label or fallback text between the tags so the value is clear to every visitor.",
+       [("Which element represents a measurement within a known range, such as disk usage?", ["<meter>", "<progress>", "<range>", "<gauge>"], 0),
+        ("What does a `<progress>` element without a `value` attribute show?", ["An indeterminate busy bar", "An empty bar", "A full bar", "Nothing"], 0)]),
+
+    _X("datalist", "HTML Datalist and Autocomplete",
+       "`<datalist>` gives a text input a list of suggestions while still letting people type anything they like.",
+       [("Connecting a datalist", "Give the input a `list` attribute that matches the `id` of the datalist.",
+         '<input list="cities">\n<datalist id="cities">\n  <option value="Chennai">\n  <option value="Mumbai">\n</datalist>'),
+        ("Datalist or select?", "A `<select>` forces one of the listed choices. A datalist only suggests them."),
+        ("The autocomplete attribute", "`autocomplete=\"email\"`, `\"name\"` or `\"off\"` tells the browser what to fill in, or not to.")],
+       '''<label for="city">Pick or type a city</label><br>
+<input id="city" list="cities" placeholder="Start typing..." autocomplete="off">
+<datalist id="cities">
+  <option value="Chennai">
+  <option value="Coimbatore">
+  <option value="Madurai">
+  <option value="Mumbai">
+</datalist>
+<p><label for="mail">Email</label><br><input id="mail" type="email" autocomplete="email"></p>''',
+       "A datalist is only a hint. Always validate the final value on the server.",
+       [("Which attribute links an input to a `<datalist>`?", ["list", "datalist", "options", "for"], 0),
+        ("What is the difference between a datalist and a select?", ["A datalist suggests, a select restricts", "They are identical", "A select suggests, a datalist restricts", "A datalist works only for numbers"], 0)]),
+
+    _X("contenteditable", "HTML Contenteditable and Spellcheck",
+       "The `contenteditable` attribute turns any element into an editable area, and `spellcheck` controls the spelling underline.",
+       [("Making content editable", "Add `contenteditable=\"true\"` (or just `contenteditable`) to any element and visitors can type in it.",
+         '<div contenteditable="true">Edit me</div>'),
+        ("Reading the result", "Use the `input` event and read `textContent` or `innerHTML`. Treat the result as untrusted text before saving it."),
+        ("Spellcheck", "`spellcheck=\"true\"` or `\"false\"` switches the red underline on or off for editable text.")],
+       '''<style>
+  #box { border: 2px dashed #1d5bd8; border-radius: 8px; padding: 12px; min-height: 60px; }
+</style>
+<div id="box" contenteditable="true" spellcheck="true">Click here and type some text.</div>
+<p>Characters: <b id="n">0</b></p>
+<script>
+  const box = document.getElementById('box'), n = document.getElementById('n');
+  const update = () => n.textContent = box.textContent.length;
+  box.addEventListener('input', update); update();
+</script>''',
+       "Never insert editable content into another page without cleaning it first. It can contain unwanted markup.",
+       [("Which attribute makes any element editable by the visitor?", ["contenteditable", "editable", "writable", "inputmode"], 0),
+        ("Which attribute switches the spelling underline off?", ["spellcheck=\"false\"", "autocorrect=\"stop\"", "lang=\"none\"", "novalidate"], 0)]),
+
+    _X("form-validation", "HTML Form Validation",
+       "Browsers can check form input for you before it is sent. Add a few attributes and invalid fields are flagged automatically.",
+       [("Validation attributes", "`required` makes a field mandatory. `minlength` and `maxlength` limit text length. `min` and `max` limit numbers and dates. `pattern` accepts a regular expression. `type=\"email\"` checks the email format.",
+         '<input type="text" name="code" required pattern="[A-Z]{3}[0-9]{2}" title="Three capital letters then two digits">'),
+        ("Checking from JavaScript", "`form.checkValidity()` returns true or false. `input.validity` explains why a field failed, and `setCustomValidity()` sets your own message."),
+        ("Style the states", "Use `:valid` and `:invalid` in CSS. Remember that client-side checks improve usability but never replace checks on the server.")],
+       '''<style>
+  input:invalid { border-color: #b42318; }
+  input:valid { border-color: #0e7a4f; }
+  input { padding: 6px; border: 2px solid #ccd; border-radius: 6px; margin: 4px 0 10px; }
+</style>
+<form id="f">
+  <label>Email<br><input type="email" name="email" required></label><br>
+  <label>Age (18-99)<br><input type="number" name="age" min="18" max="99" required></label><br>
+  <label>Code (ABC12)<br><input name="code" required pattern="[A-Z]{3}[0-9]{2}" title="Three capital letters and two digits"></label><br>
+  <button>Send</button>
+</form>
+<p id="msg">Fill in the form and press Send.</p>
+<script>
+  const f = document.getElementById('f');
+  console.log('valid at start?', f.checkValidity());
+  f.addEventListener('submit', e => { e.preventDefault(); document.getElementById('msg').textContent = 'All fields are valid. The form would be sent.'; });
+</script>''',
+       "Add a `title` attribute to a field with `pattern` so the browser can explain the expected format.",
+       [("Which attribute makes a form field mandatory?", ["required", "mandatory", "needed", "validate"], 0),
+        ("Which attribute checks input against a regular expression?", ["pattern", "regex", "match", "format"], 0),
+        ("Which CSS pseudo-class matches a field that fails validation?", [":invalid", ":error", ":wrong", ":bad-input"], 0)]),
+
+    _X("responsive-lazy-images", "HTML Lazy Loading and Responsive Images",
+       "Load the right image size for each screen, and load it only when needed, so pages stay fast.",
+       [("Lazy loading", "`loading=\"lazy\"` tells the browser to wait until an image is near the screen. Skip it for the first image people see.",
+         '<img src="photo.jpg" alt="Beach" width="600" height="400" loading="lazy">'),
+        ("srcset and sizes", "`srcset` lists image files with their widths (`600w`). `sizes` tells the browser how wide the image will be on screen. The browser picks the best file.",
+         '<img src="small.jpg"\n     srcset="small.jpg 300w, large.jpg 600w"\n     sizes="(max-width: 500px) 300px, 600px"\n     alt="Beach">'),
+        ("Width and height", "Always give `width` and `height` so the browser reserves space and the page does not jump while loading.")],
+       f'''<img src="{_svg(300, 100, '#3b82f6', '300w image')}"
+     srcset="{_svg(300, 100, '#3b82f6', '300w image')} 300w, {_svg(600, 200, '#1d5bd8', '600w image')} 600w"
+     sizes="(max-width: 500px) 300px, 600px"
+     width="300" height="100" loading="lazy" alt="A blue banner showing which image size the browser chose"
+     style="max-width:100%;height:auto">
+<p>Resize the browser window and reload to see which file is chosen.</p>''',
+       "Do not lazy load the main image at the top of the page. It should load straight away.",
+       [("Which attribute delays loading an image until it is near the screen?", ["loading=\"lazy\"", "defer", "async", "preload=\"later\""], 0),
+        ("What does the `sizes` attribute describe?", ["How wide the image will appear on screen", "The file size in kilobytes", "The image height only", "The number of images"], 0),
+        ("Why give an image `width` and `height` attributes?", ["The browser can reserve space and avoid layout jumps", "To compress the file", "To make it load faster on every device", "To add a border"], 0)]),
+
+    _X("preload-performance", "HTML Preload, Prefetch and Performance",
+       "Resource hints tell the browser what to fetch early, so important files arrive sooner.",
+       [("The hints", "`rel=\"preload\"` fetches a file needed on this page right away. `rel=\"prefetch\"` fetches a file likely needed on the next page. `rel=\"preconnect\"` opens a connection to another server early. `rel=\"dns-prefetch\"` only looks up the address.",
+         '<link rel="preload" href="fonts/main.woff2" as="font" type="font/woff2" crossorigin>\n<link rel="preconnect" href="https://cdn.example.com">'),
+        ("Scripts", "Add `defer` to a script so it runs after the HTML is parsed without blocking it. `async` runs it as soon as it is downloaded, in any order.",
+         '<script src="app.js" defer></script>'),
+        ("Other quick wins", "Compress images, set image sizes, use few fonts and keep the HTML small. Measure with your browser's Lighthouse tool.")],
+       '''<link rel="preload" as="style" href="data:text/css,.x%7Bcolor:blue%7D">
+<link rel="prefetch" href="data:text/plain,next-page">
+<ul id="out"></ul>
+<script>
+  const out = document.getElementById('out');
+  document.querySelectorAll('link[rel]').forEach(l => {
+    const li = document.createElement('li');
+    li.textContent = 'rel="' + l.rel + '" as="' + (l.getAttribute('as') || '-') + '"';
+    out.append(li);
+  });
+</script>''',
+       "Preload only what you are sure the page needs. Too many hints compete with each other and slow the page down.",
+       [("Which `rel` value fetches a file that the current page needs straight away?", ["preload", "prefetch", "dns-prefetch", "noopener"], 0),
+        ("What does `defer` do on a `<script>` tag?", ["Runs it after the HTML is parsed, without blocking", "Stops it from ever running", "Runs it before any HTML", "Loads it twice"], 0),
+        ("Which hint opens a connection to another server early?", ["preconnect", "prefetch", "preload", "modulepreload"], 0)]),
+
+    _X("open-graph-json-ld", "HTML Open Graph and JSON-LD",
+       "Metadata helps social sites and search engines show a rich preview of your page.",
+       [("Open Graph tags", "Meta tags with `property=\"og:...\"` control the title, description and image shown when a link is shared.",
+         '<meta property="og:title" content="TechHub: Learn HTML">\n<meta property="og:description" content="Free lessons">\n<meta property="og:image" content="https://example.com/cover.png">'),
+        ("JSON-LD structured data", "A script of type `application/ld+json` describes the page in a format search engines understand, such as an article, course or organisation.",
+         '<script type="application/ld+json">\n{ "@context": "https://schema.org", "@type": "Course", "name": "HTML Basics" }\n</script>'),
+        ("Where it goes", "Both belong in the `<head>`. The browser does not display them.")],
+       '''<meta property="og:title" content="TechHub: Learn HTML">
+<meta property="og:description" content="Free, clear web development lessons.">
+<script type="application/ld+json" id="ld">
+{ "@context": "https://schema.org", "@type": "Course", "name": "HTML Basics", "provider": { "@type": "Organization", "name": "TechHub" } }
+</script>
+<h3>Metadata found on this page</h3>
+<ul id="out"></ul>
+<script>
+  const out = document.getElementById('out');
+  const add = t => { const li = document.createElement('li'); li.textContent = t; out.append(li); };
+  document.querySelectorAll('meta[property^="og:"]').forEach(m => add(m.getAttribute('property') + ' = ' + m.content));
+  const data = JSON.parse(document.getElementById('ld').textContent);
+  add('JSON-LD type = ' + data['@type'] + ', name = ' + data.name);
+</script>''',
+       "Use a validator such as the Rich Results Test to check structured data before you publish.",
+       [("Which `type` value marks a script as JSON-LD structured data?", ["application/ld+json", "text/json-data", "application/schema", "text/ld"], 0),
+        ("What does the `og:image` meta tag control?", ["The picture shown when a link is shared", "The favicon", "The page background", "The largest image on the page"], 0)]),
+
+    _X("aria", "HTML ARIA Roles and Attributes",
+       "ARIA adds extra information for screen readers when plain HTML cannot describe what a widget does.",
+       [("The first rule of ARIA", "Use a native element first. A `<button>` is already a button. Only add ARIA when no native element fits."),
+        ("Common attributes", "`aria-label` gives an element a name. `aria-expanded` says whether a section is open. `aria-hidden=\"true\"` hides decoration from screen readers. `role=\"alert\"` announces important messages.",
+         '<button aria-expanded="false" aria-controls="menu">Menu</button>'),
+        ("Keep state in sync", "If you add `aria-expanded`, update it with JavaScript every time the section opens or closes.")],
+       '''<button id="b" aria-expanded="false" aria-controls="p">Show details</button>
+<div id="p" hidden>Extra details appear here.</div>
+<button aria-label="Close" style="margin-left:8px">&times;</button>
+<p id="status" role="status">Details are hidden.</p>
+<script>
+  const b = document.getElementById('b'), p = document.getElementById('p');
+  b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') === 'true';
+    b.setAttribute('aria-expanded', String(!open));
+    p.hidden = open;
+    b.textContent = open ? 'Show details' : 'Hide details';
+    document.getElementById('status').textContent = open ? 'Details are hidden.' : 'Details are shown.';
+  });
+</script>''',
+       "No ARIA is better than bad ARIA. Wrong roles can make a page harder to use than none at all.",
+       [("What is the first rule of ARIA?", ["Use a native HTML element when one exists", "Add a role to every element", "Always use `aria-hidden`", "Replace headings with roles"], 0),
+        ("Which attribute tells assistive technology whether a section is open?", ["aria-expanded", "aria-open", "aria-visible", "aria-state"], 0),
+        ("Which attribute gives an icon-only button an accessible name?", ["aria-label", "aria-name", "alt", "data-label"], 0)]),
+
+    _X("iframe-sandbox", "HTML Iframe Sandbox and Security",
+       "The `sandbox` attribute locks an `<iframe>` down so embedded content cannot do harmful things.",
+       [("Sandbox by default", "A bare `sandbox` attribute blocks scripts, forms, pop-ups and access to your site. Add tokens to allow specific features.",
+         '<iframe src="widget.html" sandbox></iframe>'),
+        ("Useful tokens", "`allow-scripts` lets scripts run. `allow-forms` lets forms submit. `allow-popups` lets links open new windows. Avoid combining `allow-scripts` with `allow-same-origin` for content you do not control."),
+        ("Other protections", "`referrerpolicy` limits what is shared, and `loading=\"lazy\"` delays the load. Always embed only sources you trust.")],
+       '''<p>Both frames run the same script. Only one is allowed to.</p>
+<iframe style="width:100%;height:60px;border:1px solid #ccd" sandbox
+  srcdoc="&lt;p id='t'&gt;Sandboxed: the script did not run.&lt;/p&gt;&lt;script&gt;document.getElementById('t').textContent='Script ran!'&lt;/script&gt;"></iframe>
+<iframe style="width:100%;height:60px;border:1px solid #ccd;margin-top:8px" sandbox="allow-scripts"
+  srcdoc="&lt;p id='t'&gt;Not run yet.&lt;/p&gt;&lt;script&gt;document.getElementById('t').textContent='allow-scripts: the script ran!'&lt;/script&gt;"></iframe>''',
+       "This preview page is itself sandboxed, which is why the editor on this site cannot touch your cookies.",
+       [("What does a bare `sandbox` attribute on an iframe do?", ["Applies all restrictions", "Removes all restrictions", "Only blocks images", "Makes the frame invisible"], 0),
+        ("Which sandbox token lets scripts run inside the frame?", ["allow-scripts", "run-js", "allow-code", "enable-script"], 0)]),
+
+    _X("drag-drop", "HTML Drag and Drop",
+       "Any element can become draggable with one attribute, and a few events turn it into a drag and drop interface.",
+       [("Making an element draggable", "Add `draggable=\"true\"`. Then listen for `dragstart` and store data with `event.dataTransfer`.",
+         '<div draggable="true" id="item">Drag me</div>'),
+        ("Creating a drop target", "On the target, cancel the default in `dragover` (otherwise drops are refused) and handle `drop`.",
+         "<script>\n  zone.addEventListener('dragover', e => e.preventDefault());\n  zone.addEventListener('drop', e => { /* move the item */ });\n</script>"),
+        ("Touch and keyboard", "Native drag and drop does not work well on touch screens or the keyboard. Offer a button as an alternative for important actions.")],
+       '''<style>
+  .item { display: inline-block; padding: 8px 14px; margin: 4px; background: #1d5bd8; color: #fff; border-radius: 8px; cursor: grab; }
+  .zone { min-height: 70px; padding: 8px; margin: 8px 0; border: 2px dashed #1d5bd8; border-radius: 10px; background: #f4f8ff; }
+  .zone.over { background: #d6e6ff; }
+</style>
+<div class="zone" id="a"><span class="item" draggable="true" id="i1">Apple</span><span class="item" draggable="true" id="i2">Banana</span></div>
+<div class="zone" id="b"><small>Drop here</small></div>
+<script>
+  document.querySelectorAll('.item').forEach(el => el.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', el.id)));
+  document.querySelectorAll('.zone').forEach(z => {
+    z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('over'); });
+    z.addEventListener('dragleave', () => z.classList.remove('over'));
+    z.addEventListener('drop', e => {
+      e.preventDefault(); z.classList.remove('over');
+      z.append(document.getElementById(e.dataTransfer.getData('text/plain')));
+    });
+  });
+</script>''',
+       "If a drop does nothing, check that `dragover` calls `preventDefault()`. That is the most common mistake.",
+       [("Which attribute makes an element draggable?", ["draggable=\"true\"", "drag=\"on\"", "movable", "dropzone"], 0),
+        ("Which event must call `preventDefault()` to allow dropping?", ["dragover", "dragstart", "dragend", "click"], 0)]),
+
+    _X("web-components", "HTML Custom Elements and Web Components",
+       "Custom elements let you define your own tags, such as `<user-card>`, with their own markup and styles.",
+       [("Defining a custom element", "The name must contain a hyphen. Create a class that extends `HTMLElement` and register it with `customElements.define`.",
+         "<script>\n  class HelloCard extends HTMLElement { /* ... */ }\n  customElements.define('hello-card', HelloCard);\n</script>"),
+        ("Shadow DOM", "`attachShadow({mode: 'open'})` creates a private tree. Styles inside it do not leak out, and outside styles do not leak in."),
+        ("Slots", "A `<slot>` inside the shadow tree shows whatever content you place between your element's tags.")],
+       '''<hello-card name="Asha">welcome to TechHub</hello-card>
+<hello-card name="Ravi">glad you are here</hello-card>
+<script>
+  class HelloCard extends HTMLElement {
+    connectedCallback() {
+      const root = this.attachShadow({ mode: 'open' });
+      root.innerHTML = `
+        <style>
+          div { border: 2px solid #1d5bd8; border-radius: 10px; padding: 10px 14px; margin: 6px 0; font-family: sans-serif; }
+          b { color: #1d5bd8; }
+        </style>
+        <div>Hello, <b>${this.getAttribute('name')}</b>: <slot></slot>!</div>`;
+    }
+  }
+  customElements.define('hello-card', HelloCard);
+</script>''',
+       "Custom element names must include a hyphen, so they never clash with future HTML tags.",
+       [("What must every custom element name contain?", ["A hyphen", "An underscore", "A capital letter", "A number"], 0),
+        ("Which call registers a custom element?", ["customElements.define()", "document.registerTag()", "HTMLElement.create()", "window.defineTag()"], 0),
+        ("What does the Shadow DOM provide?", ["Style and markup encapsulation", "Faster network loading", "Automatic translation", "Server-side rendering"], 0)]),
+
+    _X("web-apis", "HTML Web APIs Overview",
+       "Browsers offer many built-in APIs for tasks that HTML alone cannot do. This lesson is a quick tour.",
+       [("Storage", "`localStorage` keeps small amounts of text in the browser until it is cleared. `sessionStorage` lasts for one tab."),
+        ("Geolocation", "`navigator.geolocation.getCurrentPosition()` asks the user for their location. It always requires permission and a secure (HTTPS) page."),
+        ("Web Workers", "A Worker runs JavaScript on a background thread so heavy work does not freeze the page."),
+        ("Feature detection", "Before using an API, check that it exists, for example `if ('geolocation' in navigator)`. Some features are blocked in sandboxed frames, so always handle errors.",
+         "<script>\n  if ('geolocation' in navigator) { /* safe to ask */ }\n</script>")],
+       '''<ul id="out"></ul>
+<script>
+  const out = document.getElementById('out');
+  const add = t => { const li = document.createElement('li'); li.textContent = t; out.append(li); };
+  add('Geolocation API present: ' + ('geolocation' in navigator));
+  add('Web Workers present: ' + (typeof Worker !== 'undefined'));
+  add('Intl (formatting) present: ' + (typeof Intl !== 'undefined'));
+  add('Today in en-IN style: ' + new Intl.NumberFormat('en-IN').format(1234567.5));
+  try { window.localStorage.setItem('x', '1'); add('localStorage works here'); }
+  catch (e) { add('localStorage is blocked in this sandboxed preview (' + e.name + ')'); }
+</script>''',
+       "This editor blocks storage on purpose. On your own page, `localStorage` works normally.",
+       [("Which web API stores small pieces of data that stay after the tab closes?", ["localStorage", "sessionStorage", "Geolocation", "Web Workers"], 0),
+        ("What does a Web Worker do?", ["Runs JavaScript on a background thread", "Draws shapes on the screen", "Stores cookies", "Validates forms"], 0),
+        ("Why check `'geolocation' in navigator` first?", ["Some browsers or contexts do not provide the API", "It speeds up the page", "It is required by HTML", "It hides the permission prompt"], 0)]),
+
+    _X("popover", "HTML Popover Attribute",
+       "The `popover` attribute turns any element into a pop-up that opens and closes with no JavaScript.",
+       [("Basic popover", "Add `popover` to the element and `popovertarget` with the same id to a button. The browser toggles it and closes it when you press Escape or click outside.",
+         '<button popovertarget="tip">Info</button>\n<div id="tip" popover>Helpful text.</div>'),
+        ("Popover types", "The default `auto` closes when you click elsewhere. `manual` stays open until you close it with a button or script."),
+        ("Styling", "Popovers appear in the top layer, above other content. Style the `:popover-open` state and the `::backdrop` if needed.")],
+       '''<style>
+  [popover] { border: 0; border-radius: 10px; padding: 14px 18px; box-shadow: 0 8px 24px rgba(11,42,99,.35); background: #fff; color: #0b2a63; }
+</style>
+<button popovertarget="tip">Show tip</button>
+<button popovertarget="note" popovertargetaction="toggle">Toggle note</button>
+<div id="tip" popover>Click outside or press Escape to close this tip.</div>
+<div id="note" popover="manual">This note stays until you toggle it again.</div>''',
+       "Popover is a newer feature. It works in current Chrome, Edge, Safari and Firefox, but check support for older browsers.",
+       [("Which attribute turns an element into a pop-up?", ["popover", "popup", "overlay", "float"], 0),
+        ("Which attribute on a button connects it to a popover?", ["popovertarget", "popoverfor", "data-popover", "aria-popup"], 0)]),
+
+    _X("validation-checklist", "HTML Validation and Best-Practice Checklist",
+       "Before you publish, check that your HTML is valid, accessible and tidy. This lesson is a short checklist.",
+       [("Validate", "Use the W3C Markup Validator to find unclosed tags, bad nesting and misspelled attributes."),
+        ("The checklist", "Declare `<!DOCTYPE html>` and `lang`. Give every page one `<title>` and one `<h1>`. Give every image an `alt`. Link every input to a `<label>`. Use semantic elements. Keep headings in order."),
+        ("Automate it", "A small script can find common problems. The example below audits itself.",
+         "<script>\n  const bad = document.querySelectorAll('img:not([alt])');\n  console.log(bad.length + ' images without alt');\n</script>")],
+       '''<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="20" height="20">
+<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="20" height="20" alt="">
+<input id="ok" type="text"><label for="ok">Labelled input</label>
+<input id="bad" type="text">
+<h1>First</h1><h1>Second</h1>
+<ul id="report"></ul>
+<script>
+  const report = document.getElementById('report');
+  const check = (label, count) => { const li = document.createElement('li'); li.textContent = (count ? 'Problem: ' : 'OK: ') + label + (count ? ' (' + count + ')' : ''); report.append(li); console.log(li.textContent); };
+  check('images missing alt', document.querySelectorAll('img:not([alt])').length);
+  check('inputs without a label', [...document.querySelectorAll('input')].filter(i => !document.querySelector('label[for="' + i.id + '"]')).length);
+  check('pages with more than one h1', document.querySelectorAll('h1').length > 1 ? 1 : 0);
+</script>''',
+       "Tools like Lighthouse and axe check many of these rules automatically. Use them before every release.",
+       [("Which tool finds unclosed tags and bad nesting in HTML?", ["The W3C Markup Validator", "A spell checker", "A CSS minifier", "An image optimiser"], 0),
+        ("How many `<h1>` elements should a page normally have?", ["One", "Two", "Six", "None"], 0),
+        ("Which attribute must every meaningful image have?", ["alt", "title", "id", "class"], 0)]),
+]
+
+# one group, appended after the existing ones
+GROUPS.append("Advanced HTML")
+LESSONS.extend(_ADV_HTML)
+
+
 # Teaching order inside each group (lessons are sorted by group, then by this list).
 ORDER = [
     "intro", "editors", "basic", "structure", "head-elements", "elements", "attributes",
@@ -1206,6 +1624,7 @@ ORDER = [
     "forms", "form-attributes", "form-elements", "input-types", "input-attributes",
     "block-inline", "div-span", "classes", "id", "semantic", "layout", "responsive",
     "charset", "url-encoding", "canvas", "svg", "accessibility", "seo", "best-practices",
+    "data-attributes", "details-summary", "dialog", "progress-meter", "datalist", "contenteditable", "form-validation", "responsive-lazy-images", "preload-performance", "open-graph-json-ld", "aria", "iframe-sandbox", "drag-drop", "web-components", "web-apis", "popover", "validation-checklist",
 ]
 LESSONS.sort(key=lambda l: (GROUPS.index(l["group"]), ORDER.index(l["slug"])))
 BY_SLUG = {l["slug"]: l for l in LESSONS}

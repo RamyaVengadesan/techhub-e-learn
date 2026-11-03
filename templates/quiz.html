@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Quiz | TechHub{% endblock %}
+{% block title %}{{ m.title }} {{ level_name }} Quiz | TechHub{% endblock %}
 {% block plain %}
+<section class="intro slim"><div class="wrap"><p class="eyebrow">{{ m.title }} &middot; {{ level_name }}</p><h1>{{ m.title }} {{ level_name }} quiz</h1><p class="lead">Ten questions. Answer each one, then see your score.</p></div></section>
 <div class="wrap narrow">
-  <p class="crumbs"><a href="{{ url_for('quiz_pick') }}">&lsaquo; All quizzes</a></p>
-  <h1>{{ module.title ~ ' Quiz' if module else 'HTML + CSS Quiz' }}</h1>
-  <p class="lead">Ten random questions. Answer them all, then see your score.</p>
-  <div id="quiz" data-module="{{ mod }}" aria-live="polite"><p>Loading questions...</p></div>
+  <div id="quiz" class="panel" data-module="{{ m.slug }}" data-level="{{ level }}"
+       data-next-level="{{ next_level or '' }}" data-next-name="{{ next_name or '' }}" data-back="{{ url_for('quiz_module', mod=m.slug) }}" aria-live="polite"><p>Loading questions...</p></div>
 </div>
 {% endblock %}

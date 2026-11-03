@@ -1,52 +1,69 @@
 {% extends "base.html" %}
-{% block title %}{{ lesson.title }} | TechHub{% endblock %}
+{% block title %}{{ lesson.title }} | {{ site_name }}{% endblock %}
+{% block description %}{{ lesson.intro|replace('`', '') }}{% endblock %}
+{% block jsonld %}<script type="application/ld+json">{{ {"@context": "https://schema.org", "@type": "LearningResource", "name": lesson.title, "description": lesson.intro|replace('`', ''), "learningResourceType": "Tutorial", "educationalLevel": lesson.level, "inLanguage": "en", "isAccessibleForFree": true, "url": absolute(request.path)}|tojson }}</script>{% endblock %}
 {% block content %}
-<article data-slug="{{ lesson.slug }}">
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ url_for('home') }}">TechHub</a> &rsaquo; <a href="{{ url_for('module', mod=module.slug) }}">{{ module.title }}</a> &rsaquo; <span>{{ lesson.group }}</span></nav>
-  <h1>{{ lesson.title }}</h1>
-  <p class="count">Lesson {{ num }} of {{ total }}</p>
-  <div class="pn">
-    {% if prev %}<a class="btn ghost" href="{{ url_for('lesson', mod=module.slug, slug=prev.slug) }}">&#10094; Previous</a>{% else %}<a class="btn ghost" href="{{ url_for('module', mod=module.slug) }}">&#10094; Overview</a>{% endif %}
-    {% if next %}<a class="btn" data-next href="{{ url_for('lesson', mod=module.slug, slug=next.slug) }}">Next &#10095;</a>{% else %}<a class="btn" data-next href="{{ url_for('quiz', mod=module.slug) }}">Take the {{ module.title }} quiz &#10095;</a>{% endif %}
-  </div>
-
-  <p class="lead">{{ lesson.intro|rich }}</p>
+<div class="lesson-col">
+<article class="article lesson" data-slug="{{ lesson.slug }}">
+  <header class="lhero t-{{ module.slug }}">
+    <div class="lh-top">
+      <span class="tbadge">{{ 'JS' if module.slug == 'js' else module.title }}</span>
+      <span class="pill">Lesson {{ num }} of {{ total }}</span>
+      <span class="pill">{{ lesson.level|capitalize }}</span>
+      <span class="pill">{{ [1, (lesson.sections|map(attribute='p')|join(' ')|wordcount / 180)|round|int]|max }} min read</span>
+    </div>
+    <h1>{{ lesson.title }}</h1>
+    <p class="lead">{{ lesson.intro|rich }}</p>
+    <div class="lh-prog" role="img" aria-label="Lesson {{ num }} of {{ total }}"><i style="width: {{ (num / total * 100)|round|int }}%"></i></div>
+  </header>
 
   {% for s in lesson.sections %}
+  <section class="lsec" id="s{{ loop.index }}">
     <h2>{{ s.h }}</h2>
     <p>{{ s.p|rich }}</p>
-    {% if s.code %}<pre class="code" tabindex="0"><code>{{ s.code|highlight }}</code></pre>{% endif %}
+    {% if s.code %}<div class="codebox win"><div class="cb-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="cb-name">Example</span><button type="button" data-copy>Copy</button></div><pre class="code"><code>{{ s.code|highlight }}</code></pre></div>{% endif %}
+  </section>
   {% endfor %}
 
-  {% if lesson.tip %}<div class="note"><b>Tip</b>{{ lesson.tip|rich }}</div>{% endif %}
+  {% if lesson.tip %}<div class="callout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><div><b>Tip</b><p>{{ lesson.tip|rich }}</p></div></div>{% endif %}
 
-  <h2>Try it yourself</h2>
-  <p>Change the code and press <b>Run</b> to see the result.</p>
-  <div class="editor" data-editor>
-    <div class="pane">
-      <div class="pane-head">Code <button class="btn small" type="button" data-run>Run &#9656;</button></div>
-      <textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ lesson.example }}</textarea>
+  <section class="lsec" id="try">
+    <h2>Try it yourself</h2>
+    <p>Change the code and press Run. The result appears next to it.</p>
+    <div class="editor split" data-editor>
+      <div class="ed-bar">
+        <span class="ed-title"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ed-file">index.html</span></span>
+        <span class="ed-actions"><span class="ed-hint">Ctrl + Enter to run</span><button class="ed-reset" type="button" data-reset>Reset</button><a class="ed-full" href="{{ url_for('try_lesson', slug=lesson.slug) }}">Full screen</a><button class="btn small ed-run" type="button" data-run><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Run</button></span>
+      </div>
+      <div class="panes">
+        <div class="pane-in"><div class="pane-label">Code</div><textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ lesson.example }}</textarea></div>
+        <div class="pane-out"><div class="ed-bar res"><span class="pane-label">Result</span><span class="live"><i></i>Live preview</span></div><iframe title="Result" sandbox="allow-scripts" data-out></iframe></div>
+      </div>
     </div>
-    <div class="pane">
-      <div class="pane-head">Result <a class="small-link" href="{{ url_for('try_lesson', slug=lesson.slug) }}">Open full screen</a></div>
-      <iframe title="Result" sandbox="" data-out></iframe>
-    </div>
-  </div>
+  </section>
 
   <section class="exercise" aria-labelledby="exh">
     <h2 id="exh">Test yourself</h2>
     {% for q in exercise %}
     <div class="q" data-id="{{ q.id }}">
-      <p class="qtext">{{ loop.index }}. {{ q.q }}</p>
-      <div class="opts">{% for o in q.options %}<button type="button" class="opt" data-choice="{{ o }}">{{ o }}</button>{% endfor %}</div>
+      <p class="qtext"><span class="qn">{{ loop.index }}</span>{{ q.q }}</p>
+      <div class="opts">{% for o in q.options %}<button type="button" class="opt" data-choice="{{ o }}"><b>{{ 'ABCD'[loop.index0] }}</b><span>{{ o }}</span></button>{% endfor %}</div>
       <p class="fb" aria-live="polite"></p>
     </div>
     {% endfor %}
   </section>
 
-  <div class="pn">
-    {% if prev %}<a class="btn ghost" href="{{ url_for('lesson', mod=module.slug, slug=prev.slug) }}">&#10094; Previous</a>{% else %}<span></span>{% endif %}
-    {% if next %}<a class="btn" data-next href="{{ url_for('lesson', mod=module.slug, slug=next.slug) }}">Next &#10095;</a>{% else %}<a class="btn" data-next href="{{ url_for('quiz', mod=module.slug) }}">Take the {{ module.title }} quiz &#10095;</a>{% endif %}
+  <div class="feedback" data-feedback="{{ lesson.slug }}">
+    <span>Was this lesson helpful?</span>
+    <button type="button" class="btn ghost small" data-vote="yes">Yes</button>
+    <button type="button" class="btn ghost small" data-vote="no">No</button>
+    <span class="fb-msg" aria-live="polite"></span>
   </div>
+
+  <nav class="pager" aria-label="Lesson navigation">
+    {% if prev %}<a class="pg" href="{{ url_for('lesson', mod=module.slug, slug=prev.slug) }}"><small>Previous lesson</small><span>{{ prev.title }}</span></a>{% else %}<a class="pg" href="{{ url_for('module', mod=module.slug) }}"><small>Back to</small><span>{{ module.title }} overview</span></a>{% endif %}
+    {% if next %}<a class="pg next" data-next href="{{ url_for('lesson', mod=module.slug, slug=next.slug) }}"><small>Next lesson</small><span>{{ next.title }}</span></a>{% else %}<a class="pg next" data-next href="{{ url_for('quiz_module', mod=module.slug) }}"><small>Finished</small><span>Take the {{ module.title }} quiz</span></a>{% endif %}
+  </nav>
 </article>
+</div>
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}{{ s.title }} cheat sheet | {{ site_name }}{% endblock %}
+{% block description %}{{ s.intro }}{% endblock %}
+{% block plain %}
+{% call shell('Cheat sheets', 'sheets') %}
+{{ phead('Tools', s.title, s.intro, icon='file', stats=[(s.sections|length, 'sections')]) }}
+<div class="sheet-bar no-print"><button class="btn" type="button" onclick="window.print()">Print or save as PDF</button><a class="btn ghost" href="{{ url_for('cheatsheets') }}">All cheat sheets</a></div>
+<div class="sheet-grid">
+{% for sec in s.sections %}
+  <section class="sheet-card"><h2>{{ sec.title }}</h2>
+    <dl>{% for it in sec['items'] %}<div><dt><code>{{ it.code }}</code></dt><dd>{{ it.desc }}</dd></div>{% endfor %}</dl></section>
+{% endfor %}
+</div>
+{% endcall %}
+{% endblock %}

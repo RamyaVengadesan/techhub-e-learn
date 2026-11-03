@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ c.title }} | Challenge | {{ site_name }}{% endblock %}
+{% block description %}{{ c.instructions|replace('`', '') }}{% endblock %}
+{% block plain %}
+<div class="ch-shell">
+  <aside class="ch-side">
+    <p class="meta">{{ module.title }} &middot; {{ level_name }}</p>
+    <h1>{{ c.title }}</h1>
+    <p>{{ c.instructions|rich }}</p>
+    <h3>Checks</h3>
+    <ul class="checks" id="checks">{% for t in c.tests %}<li data-state="idle"><span class="state">Not run</span>{{ t.label }}</li>{% endfor %}</ul>
+    <p class="check-summary" id="summary" aria-live="polite"></p>
+    <p class="actions-row">
+      <button class="btn" type="button" id="checkBtn">Check my code</button>
+      <button class="btn ghost" type="button" id="hintBtn">Show hint</button>
+      <button class="btn ghost" type="button" id="solBtn">Show solution</button>
+    </p>
+    <p class="hint" id="hint" hidden><b>Hint:</b> {{ c.hint|rich }}</p>
+    <div id="solution" hidden><p class="small">Try to solve it yourself first. Compare your answer with this one:</p>
+      <div class="codebox win"><div class="cb-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="cb-name">Solution</span><button type="button" data-copy>Copy</button></div><pre class="code"><code>{{ c.solution|highlight }}</code></pre></div></div>
+    <p class="small">{% if c.lesson and c.lesson in lessons %}Related lesson: <a href="{{ url_for('lesson', mod=lessons[c.lesson].module, slug=c.lesson) }}">{{ lessons[c.lesson].title }}</a>. {% endif %}<a href="{{ url_for('challenges') }}">All challenges</a></p>
+    <nav class="pager">{% if prev %}<a class="pg" href="{{ url_for('challenge', slug=prev.slug) }}"><small>Previous</small><span>{{ prev.title }}</span></a>{% else %}<span></span>{% endif %}
+      {% if next %}<a class="pg next" href="{{ url_for('challenge', slug=next.slug) }}"><small>Next</small><span>{{ next.title }}</span></a>{% endif %}</nav>
+  </aside>
+  <section class="ch-work">
+    <div class="editor split tall" data-editor data-challenge>
+    <div class="ed-bar">
+      <span class="ed-title"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ed-file">index.html</span></span>
+      <span class="ed-actions"><span class="ed-hint">Ctrl + Enter to run</span><button class="btn small ed-run" type="button" data-run><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Run</button></span>
+    </div>
+    <div class="panes">
+      <div class="pane-in"><div class="pane-label">Your code</div><textarea spellcheck="false" autocomplete="off" aria-label="Code editor">{{ c.starter }}</textarea></div>
+      <div class="pane-out"><div class="ed-bar res"><span class="pane-label">Result</span><span class="live"><i></i>Live preview</span></div><iframe title="Result" sandbox="allow-scripts" data-out></iframe></div>
+    </div>
+  </div>
+  </section>
+</div>
+<script type="application/json" id="ch-data">{{ {"tests": c.tests, "solution": c.solution, "starter": c.starter}|tojson }}</script>
+{% endblock %}

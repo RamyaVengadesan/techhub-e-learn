@@ -3,48 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}TechHub | Learn HTML and CSS{% endblock %}</title>
-  <meta name="description" content="TechHub: free, step-by-step HTML and CSS courses with live examples, exercises and quizzes.">
+  <script>try{var t=localStorage.getItem("techhub-theme");if(!t&&matchMedia("(prefers-color-scheme: dark)").matches)t="dark";if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <title>{% block title %}{{ site_name }}: Learn HTML, CSS and JavaScript{% endblock %}</title>
+  {% set desc %}{% block description %}Free HTML, CSS and JavaScript tutorials with live examples, challenges, projects, a reference and quizzes.{% endblock %}{% endset %}
+  <meta name="description" content="{{ desc|striptags|trim }}">
+  <link rel="canonical" href="{{ absolute(request.path) }}">
+  <meta property="og:site_name" content="{{ site_name }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ self.title()|striptags|trim }}">
+  <meta property="og:description" content="{{ desc|striptags|trim }}">
+  <meta property="og:url" content="{{ absolute(request.path) }}">
+  <meta name="twitter:card" content="summary">
+  {% block jsonld %}{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pro.css') }}">
 </head>
 <body data-page="{{ page }}">
   <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <div class="top-in">
-      {% if module is defined and module and page in ('lesson', 'module') %}
-      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson menu" aria-expanded="false" aria-controls="side">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
-      {% endif %}
-      <a class="logo" href="{{ url_for('home') }}" aria-label="TechHub home"><span class="mark" aria-hidden="true"><i></i><i></i></span><span class="txt">Tech<b>Hub</b></span></a>
-      <nav class="nav" aria-label="Main">
-        {% for m in modules %}<a href="{{ url_for('module', mod=m.slug) }}" {% if module is defined and module and module.slug == m.slug and page in ('lesson','module') %}class="on"{% endif %}>{{ m.title }}</a>{% endfor %}
-        <a href="{{ url_for('playground') }}" {% if page == 'try' %}class="on"{% endif %}>Try it</a>
-        <a href="{{ url_for('quiz_pick') }}" {% if page == 'quiz' %}class="on"{% endif %}>Quizzes</a>
+  {% set cur = request.path %}
+  {% set has_side = module is defined and module and page in ('lesson', 'module') %}
+  {% set n_lessons = modules|map(attribute='lessons')|map('length')|sum %}
+  <header class="nb">
+    <div class="nb-in">
+      {% if has_side %}<button class="icon-btn lessons-btn" id="lessonsBtn" type="button" aria-label="Open lesson list" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>{% endif %}
+      <a class="logo" href="{{ url_for('home') }}" aria-label="{{ site_name }} home"><span class="mark" aria-hidden="true">&lt;/&gt;</span><span>Tech<b>Hub</b></span></a>
+      <nav class="nb-links" aria-label="Main">
+        {% for m in modules %}<a class="nl {{ 'on' if cur.split('/')[1] == m.slug }}" href="{{ url_for('module', mod=m.slug) }}">{{ m.title }}</a>{% endfor %}
+        <a class="nl {{ 'on' if cur.startswith('/reference') }}" href="{{ url_for('reference_index') }}">Reference</a>
+        <details class="ndd"><summary class="nl {{ 'on' if cur.startswith(('/challenges','/projects','/quiz','/try')) }}">Practice</summary>
+          <div class="ndd-panel"><a href="{{ url_for('challenges') }}">Challenges</a><a href="{{ url_for('projects') }}">Projects</a><a href="{{ url_for('quiz_pick') }}">Quizzes</a><a href="{{ url_for('playground') }}">Try it editor</a></div></details>
+        <details class="ndd"><summary class="nl {{ 'on' if cur.startswith(('/tools','/cheatsheets','/glossary')) }}">Tools</summary>
+          <div class="ndd-panel"><a href="{{ url_for('tools') }}">CSS playgrounds</a><a href="{{ url_for('cheatsheets') }}">Cheat sheets</a><a href="{{ url_for('glossary') }}">Glossary</a></div></details>
+        <a class="nl {{ 'on' if cur.startswith('/roadmap') }}" href="{{ url_for('roadmap') }}">Learning path</a>
       </nav>
-      <div class="gsearch">
+      <div class="gsearch" data-search>
         <label class="sr-only" for="gq">Search lessons</label>
-        <input id="gq" type="search" placeholder="Search lessons" autocomplete="off" aria-controls="gres">
-        <div id="gres" class="gres" role="listbox" hidden></div>
+        <svg class="gs-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="gq" type="search" placeholder="Search {{ n_lessons }} lessons" autocomplete="off">
+        <div class="gres" role="listbox" hidden></div>
       </div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch between light and dark theme" title="Switch theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      {% if user %}
+      <details class="ndd udd"><summary class="avatar" aria-label="Your account">{{ user.name[:1]|upper }}</summary>
+        <div class="ndd-panel right"><p class="who">{{ user.name }}</p><a href="{{ url_for('my_learning') }}">My learning</a>
+          <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button type="submit">Log out</button></form></div></details>
+      {% else %}
+      <a class="nb-login" href="{{ url_for('login') }}">Log in</a><a class="nb-signup" href="{{ url_for('signup') }}">Sign up</a>
+      {% endif %}
+      <button class="icon-btn site-btn" id="navBtn" type="button" aria-label="Open site menu" aria-expanded="false" aria-controls="siteMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+    <div class="site-menu2" id="siteMenu" hidden>
+      {% for m in modules %}<a href="{{ url_for('module', mod=m.slug) }}">{{ m.title }} tutorial</a>{% endfor %}
+      <a href="{{ url_for('reference_index') }}">Reference</a><a href="{{ url_for('roadmap') }}">Learning path</a><a href="{{ url_for('challenges') }}">Challenges</a><a href="{{ url_for('projects') }}">Projects</a>
+      <a href="{{ url_for('quiz_pick') }}">Quizzes</a><a href="{{ url_for('playground') }}">Try it editor</a><a href="{{ url_for('tools') }}">CSS playgrounds</a><a href="{{ url_for('cheatsheets') }}">Cheat sheets</a><a href="{{ url_for('glossary') }}">Glossary</a>
+      {% if user %}<a href="{{ url_for('my_learning') }}">My learning</a>{% else %}<a href="{{ url_for('login') }}">Log in</a><a href="{{ url_for('signup') }}">Sign up</a>{% endif %}
     </div>
   </header>
 
-  {% if module is defined and module and page in ('lesson', 'module') %}
-  <div class="shell">
-    <aside class="side" id="side" aria-label="{{ module.title }} lessons">
-      <div class="side-head">
-        <a href="{{ url_for('module', mod=module.slug) }}" class="side-title">{{ module.title }} Tutorial</a>
+  {% if has_side %}
+  <div class="lshell">
+    <aside class="lside" id="side" aria-label="{{ module.title }} lessons">
+      <div class="ls-head">
+        <a href="{{ url_for('module', mod=module.slug) }}" class="ls-title t-{{ module.slug }}"><span class="tbadge">{{ 'JS' if module.slug == 'js' else module.title }}</span>{{ module.title }} Tutorial</a>
         <label class="sr-only" for="sideQ">Filter lessons</label>
-        <input id="sideQ" type="search" placeholder="Filter {{ module.title }} lessons" autocomplete="off">
+        <input id="sideQ" type="search" placeholder="Filter lessons" autocomplete="off">
       </div>
       <nav id="sideNav">
       {% for g in module.groups %}
-        <div class="grp"><h4>{{ g }}</h4>
-        {% for l in module.lessons if l.group == g %}
-          <a href="{{ url_for('lesson', mod=module.slug, slug=l.slug) }}" data-slug="{{ l.slug }}"
-             {% if lesson is defined and lesson.slug == l.slug %}class="on" aria-current="page"{% endif %}><span>{{ l.title }}</span><i class="tick" aria-hidden="true"></i></a>
-        {% endfor %}</div>
+        {% set items = module.lessons | selectattr('group', 'equalto', g) | list %}
+        <details class="lgrp" {% if lesson is defined and lesson.group == g %}open{% endif %}>
+          <summary>{{ g }}</summary>
+          {% for l in items %}
+          {% set t = l.title|replace(module.title ~ ' ', '', 1) %}
+          <a href="{{ url_for('lesson', mod=module.slug, slug=l.slug) }}" data-slug="{{ l.slug }}" {% if lesson is defined and lesson.slug == l.slug %}class="on" aria-current="page"{% endif %}>{{ l.title if t[0].islower() else t }}</a>
+          {% endfor %}
+        </details>
       {% endfor %}
       </nav>
     </aside>
@@ -55,14 +93,26 @@
   <main class="plain" id="main" tabindex="-1">{% block plain %}{% endblock %}</main>
   {% endif %}
 
-  <footer class="foot">
-    <div class="foot-in">
-      <div><a class="logo dark" href="{{ url_for('home') }}"><span class="mark" aria-hidden="true"><i></i><i></i></span><span class="txt">Tech<b>Hub</b></span></a>
-        <p>Free, clear web development lessons.</p></div>
-      <div><h5>Courses</h5>{% for m in modules %}<a href="{{ url_for('module', mod=m.slug) }}">{{ m.title }} Tutorial</a>{% endfor %}</div>
-      <div><h5>Practice</h5><a href="{{ url_for('playground') }}">Try it editor</a><a href="{{ url_for('quiz_pick') }}">Quizzes</a></div>
+  <footer class="pfoot">
+    <div class="pf-in">
+      <div class="pf-brand">
+        <a class="logo" href="{{ url_for('home') }}"><span class="mark" aria-hidden="true">&lt;/&gt;</span><span>Tech<b>Hub</b></span></a>
+        <p>Free, hands-on tutorials for HTML, CSS and JavaScript, with a live editor, auto-checked challenges and guided projects.</p>
+      </div>
+      <nav class="pf-col" aria-label="Learn"><h3>Learn</h3>
+        {% for m in modules %}<a href="{{ url_for('module', mod=m.slug) }}">{{ m.title }} tutorial</a>{% endfor %}
+        <a href="{{ url_for('roadmap') }}">Learning path</a></nav>
+      <nav class="pf-col" aria-label="Practice"><h3>Practice</h3>
+        <a href="{{ url_for('challenges') }}">Challenges</a><a href="{{ url_for('projects') }}">Projects</a><a href="{{ url_for('quiz_pick') }}">Quizzes</a><a href="{{ url_for('playground') }}">Try it editor</a></nav>
+      <nav class="pf-col" aria-label="Resources"><h3>Resources</h3>
+        <a href="{{ url_for('reference_index') }}">Reference</a><a href="{{ url_for('cheatsheets') }}">Cheat sheets</a><a href="{{ url_for('glossary') }}">Glossary</a><a href="{{ url_for('tools') }}">CSS playgrounds</a></nav>
+    </div>
+    <div class="pf-bar">
+      <span>&copy; {{ site_name }}. Free tutorials for web developers.</span>
+      <span class="pf-legal"><a href="{{ url_for('privacy') }}">Privacy</a><a href="{{ url_for('terms') }}">Terms</a><a href="mailto:{{ contact_email }}">Contact</a></span>
     </div>
   </footer>
+  {% if user %}<script type="application/json" id="th-user">{{ {"name": user.name, "done": user_done_list}|tojson }}</script>{% endif %}
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

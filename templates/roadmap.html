@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Learning roadmap: front-end development from zero | {{ site_name }}{% endblock %}
+{% block description %}A step-by-step path from complete beginner to building interactive websites with HTML, CSS and JavaScript.{% endblock %}
+{% block plain %}
+{% call shell('Stages', 'stages') %}
+{{ phead('Learning path', 'Front-end learning roadmap', 'Follow these stages in order. Each one lists the lessons to read, things to do and practice to finish before moving on. Times are a suggested pace for about 5 hours a week.', stats=[(stages|length, 'stages'), (stages|map(attribute='lessons')|map('length')|sum, 'lessons')], icon='route') }}
+<ol class="x-stages">
+{% for s in stages %}
+  <li class="x-stage" id="stage{{ loop.index }}">
+    <span class="x-stage-no x-{{ s.module }}" aria-hidden="true">{{ loop.index }}</span>
+    <div class="x-stage-card">
+      <header>
+        <div><h2>{{ s.title }}</h2><p class="x-goal">{{ s.goal }}</p></div>
+        <span class="x-pace">{{ ico('clock') }}{{ s.pace }}</span>
+      </header>
+      <div class="x-stage-cols">
+        <section><h3>Lessons to read</h3>
+          <ul class="x-chips">{% for sl in s.lessons %}<li><a href="{{ url_for('lesson', mod=lessons[sl].module, slug=sl) }}">{{ lessons[sl].title }}</a></li>{% endfor %}</ul></section>
+        <section><h3>Do this</h3>
+          <ul class="x-tasks">{% for t in s.tasks %}<li>{{ ico('check') }}<span>{{ t|rich }}</span></li>{% endfor %}</ul></section>
+      </div>
+      <footer><h3>Practice</h3>
+        <p>{% for label, href in s.practice %}<a class="x-pill" href="{{ href }}">{{ label }}{{ ico('arrow') }}</a>{% endfor %}</p></footer>
+    </div>
+  </li>
+{% endfor %}
+</ol>
+{% endcall %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}Reference | TechHub{% endblock %}
+{% block plain %}
+{% set total = refs|map(attribute='groups')|map('map', attribute='items')|map('map', 'length')|map('sum')|sum %}
+{% call shell('Reference tables', 'refs') %}
+{{ phead('Reference', 'Reference', 'Quick lookup tables for HTML, CSS and JavaScript. Pick a table, filter it, and jump to the matching lesson.',
+         stats=[(refs|length, 'Tables'), (total, 'Entries')], icon='file') }}
+  <div class="x-pilltabs x-filterbar" role="tablist" aria-label="Filter by language">
+    <button type="button" class="btn small on" data-f="all">All</button>
+    {% for m in modules %}<button type="button" class="btn small ghost" data-f="{{ m.slug }}">{{ m.title }}</button>{% endfor %}
+  </div>
+  {% for m in modules %}
+  <section data-mod="{{ m.slug }}" class="x-section">
+    <h2 class="sec">{{ m.title }} reference</h2>
+    <div class="cards3">
+      {% for r in refs if r.module == m.slug %}
+      <a class="tcard t-{{ m.slug }}" href="{{ url_for('reference', slug=r.slug) }}">
+        <span class="tbadge">{{ 'JS' if m.slug == 'js' else m.title }}</span>
+        <b>{{ r.title }}</b>
+        <span class="tdesc">{{ r.intro }}</span>
+        <span class="tmeta">{{ r.groups|map(attribute='items')|map('length')|sum }} entries &middot; {{ r.groups|length }} groups</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+{% endcall %}
+<script>
+(function(){var bar=document.querySelector('.x-filterbar');if(!bar)return;
+bar.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+bar.querySelectorAll('button').forEach(function(x){x.classList.toggle('ghost',x!==b)});
+document.querySelectorAll('.x-section[data-mod]').forEach(function(s){s.hidden=b.dataset.f!=='all'&&s.dataset.mod!==b.dataset.f})})})();
+</script>
+{% endblock %}

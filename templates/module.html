@@ -1,25 +1,50 @@
 {% extends "base.html" %}
+{% from "_ui.html" import ico %}
 {% block title %}{{ module.title }} Tutorial | TechHub{% endblock %}
 {% block content %}
-<section class="mod-hero {{ module.slug }}">
-  <p class="eyebrow light">Module</p>
-  <h1>{{ module.title }} Tutorial</h1>
-  <p class="lead">{{ module.tagline }}</p>
-  <p><a class="btn big white" id="startBtn" href="{{ url_for('lesson', mod=module.slug, slug=module.lessons[0].slug) }}">Start the course</a>
-     <a class="btn big outline" href="{{ url_for('quiz', mod=module.slug) }}">Take the {{ module.title }} quiz</a></p>
-</section>
-<div class="progress-card">
-  <b data-progress-text="{{ module.lessons|map(attribute='slug')|join(',') }}">0% complete</b>
-  <div class="bar"><i data-progress="{{ module.lessons|map(attribute='slug')|join(',') }}" style="width:0"></i></div>
-</div>
-{% for g in module.groups %}
-  <h2 class="group">{{ g }}</h2>
-  <div class="cards">
-  {% for l in module.lessons if l.group == g %}
-    <a class="card" href="{{ url_for('lesson', mod=module.slug, slug=l.slug) }}" data-slug="{{ l.slug }}">
-      <b>{{ l.title }}</b><span>{{ l.intro }}</span><i class="tick" aria-hidden="true"></i>
-    </a>
-  {% endfor %}
+{% set first = module.lessons[0] %}
+{% set ref = (refs|selectattr('module', 'equalto', module.slug)|list)|first %}
+<div class="x-mod">
+  <section class="x-mhero t-{{ module.slug }}">
+    <div class="x-langs" role="tablist" aria-label="Choose a language">
+      {% for m in modules %}<a role="tab" class="{{ 'on' if m.slug == module.slug }}" {% if m.slug == module.slug %}aria-selected="true"{% endif %} href="{{ url_for('module', mod=m.slug) }}"><i class="lg lg-{{ m.slug }}">{{ 'JS' if m.slug == 'js' else m.title }}</i>{{ m.title }}</a>{% endfor %}
+    </div>
+    <div class="x-mhero-body">
+      <div class="x-mhero-copy">
+        <p class="x-eyebrow">Free tutorial &middot; {{ module.lessons|length }} lessons in {{ module.groups|length }} chapters</p>
+        <h1>{{ module.title }} Tutorial</h1>
+        <p class="x-lead">{{ module.tagline }}</p>
+        <p class="x-cta">
+          <a class="btn x-btn" id="startBtn" data-mod="{{ module.slug }}" data-slugs="{{ module.lessons|map(attribute='slug')|join(',') }}" href="{{ url_for('lesson', mod=module.slug, slug=first.slug) }}">Start learning {{ ico('arrow') }}</a>
+          <a class="x-btn ghost" href="{{ url_for('quiz_module', mod=module.slug) }}">Take a quiz</a>
+        </p>
+      </div>
+      <ul class="x-mstats" aria-label="{{ module.title }} at a glance">
+        <li><b>{{ module.lessons|length }}</b><span>Lessons</span></li>
+        <li><b>{{ module.groups|length }}</b><span>Chapters</span></li>
+        <li><b>3</b><span>Quiz levels</span></li>
+        <li><b>{% if ref %}{{ ref.groups|map(attribute='items')|map('length')|sum }}{% else %}&ndash;{% endif %}</b><span>Reference entries</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="x-mcards">
+    <a class="x-qcard" href="{{ url_for('lesson', mod=module.slug, slug=first.slug) }}"><span class="x-qico">{{ ico('book') }}</span><b>Pick a lesson</b><span>Every chapter is in the lesson menu on the left. Read, edit the code and test yourself.</span></a>
+    <a class="x-qcard" href="{{ url_for('quiz_module', mod=module.slug) }}"><span class="x-qico">{{ ico('help') }}</span><b>{{ module.title }} quizzes</b><span>Beginner, intermediate and advanced levels.</span></a>
+    {% if ref %}<a class="x-qcard" href="{{ url_for('reference', slug=ref.slug) }}"><span class="x-qico">{{ ico('file') }}</span><b>{{ module.title }} reference</b><span>Look things up quickly in tables.</span></a>{% endif %}
+    <a class="x-qcard" href="{{ url_for('challenges') }}#{{ module.slug }}"><span class="x-qico">{{ ico('target') }}</span><b>Coding challenges</b><span>Write code and get it checked straight away.</span></a>
   </div>
-{% endfor %}
+
+  <h2 class="x-h2">Chapters</h2>
+  <div class="x-chapters">
+    {% for g in module.groups %}
+    {% set items = module.lessons|selectattr('group', 'equalto', g)|list %}
+    <a class="x-chap" href="{{ url_for('lesson', mod=module.slug, slug=items[0].slug) }}">
+      <span class="x-chap-no">{{ '%02d'|format(loop.index) }}</span>
+      <span class="x-chap-body"><b>{{ g }}</b><small>{{ items|length }} lesson{{ '' if items|length == 1 else 's' }}</small></span>
+      <span class="x-chap-go">{{ ico('arrow') }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

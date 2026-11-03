@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}CSS playgrounds | {{ site_name }}{% endblock %}
+{% block description %}Interactive flexbox, grid and box model tools that show the CSS as you change the controls.{% endblock %}
+{% block plain %}
+{% set ttabs = [('tools','CSS playgrounds',url_for('tools')),('sheets','Cheat sheets',url_for('cheatsheets')),('gloss','Glossary',url_for('glossary'))] %}
+{% call shell('Tools', [('Flexbox playground', url_for('tool', tool='flexbox')), ('Grid playground', url_for('tool', tool='grid')), ('Box model visualizer', url_for('tool', tool='box-model')), ('Cheat sheets', url_for('cheatsheets')), ('Glossary', url_for('glossary'))]) %}
+{{ phead('Tools', 'CSS playgrounds', 'Change the controls and watch the layout update. Copy the CSS when it looks right.', tabs=ttabs, active='tools', stats=[(3, 'Playgrounds')], icon='flex') }}
+  <div class="x-grid">
+    <a class="x-card t-css" href="{{ url_for('tool', tool='flexbox') }}"><span class="x-card-ico">{{ ico('flex') }}</span><b class="x-card-title">Flexbox playground</b><span class="x-card-desc">Direction, wrapping, alignment and gap, with the generated CSS.</span><span class="x-card-meta"><em>Interactive</em><span class="x-go">{{ ico('arrow') }}</span></span></a>
+    <a class="x-card t-css" href="{{ url_for('tool', tool='grid') }}"><span class="x-card-ico">{{ ico('grid') }}</span><b class="x-card-title">Grid playground</b><span class="x-card-desc">Columns, rows, gaps and alignment for a CSS grid.</span><span class="x-card-meta"><em>Interactive</em><span class="x-go">{{ ico('arrow') }}</span></span></a>
+    <a class="x-card t-css" href="{{ url_for('tool', tool='box-model') }}"><span class="x-card-ico">{{ ico('box') }}</span><b class="x-card-title">Box model visualizer</b><span class="x-card-desc">See margin, border, padding and content sizes in one diagram.</span><span class="x-card-meta"><em>Interactive</em><span class="x-go">{{ ico('arrow') }}</span></span></a>
+  </div>
+  <h2 class="x-h2">More study aids</h2>
+  <div class="x-grid">
+    <a class="x-card t-js" href="{{ url_for('cheatsheets') }}"><span class="x-card-ico">{{ ico('file') }}</span><b class="x-card-title">Cheat sheets</b><span class="x-card-desc">Printable one-page summaries for HTML, CSS and JavaScript.</span><span class="x-card-meta"><em>Printable</em><span class="x-go">{{ ico('arrow') }}</span></span></a>
+    <a class="x-card t-html" href="{{ url_for('glossary') }}"><span class="x-card-ico">{{ ico('abc') }}</span><b class="x-card-title">Glossary</b><span class="x-card-desc">Plain-English meanings of web development terms.</span><span class="x-card-meta"><em>A to Z</em><span class="x-go">{{ ico('arrow') }}</span></span></a>
+  </div>
+{% endcall %}
+{% endblock %}

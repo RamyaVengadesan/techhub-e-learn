@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_ui.html" import phead, ico, shell with context %}
+{% block title %}{{ p.title }} | Project | {{ site_name }}{% endblock %}
+{% block description %}{{ p.summary }}{% endblock %}
+{% block plain %}
+{% set ptabs = [('challenges','Challenges',url_for('challenges')),('projects','Projects',url_for('projects')),('quizzes','Quizzes',url_for('quiz_pick')),('try','Try it editor',url_for('playground'))] %}
+{% call shell('Practice', [('Challenges', url_for('challenges')), ('Projects', url_for('projects')), ('Quizzes', url_for('quiz_pick')), ('Try it editor', url_for('playground'))]) %}
+{{ phead('Practice', p.title, p.summary, tabs=ptabs, active='projects', stats=[(level_name, 'level'), (p.minutes ~ ' min', 'about'), (p.steps|length, 'steps')], icon='layers') }}
+<div class="proj-body">
+  <div class="panel proj-build"><h2 style="margin-top:0">What you will build</h2><p>{{ p.goal|rich }}</p>
+    <p class="skill-row">{% for s in p.skills %}<em>{{ s }}</em>{% endfor %}</p>
+    <iframe class="proj-preview" title="Finished project preview" sandbox="allow-scripts" srcdoc="{{ p.final }}"></iframe>
+    <p class="actions-row"><a class="btn" href="{{ url_for('project_edit', slug=p.slug) }}">Open the finished project in the editor</a></p></div>
+
+  <h2 class="sec">Steps</h2>
+  <ol class="steps">
+  {% for s in p.steps %}
+    <li><h3>{{ s.title }}</h3><p>{{ s.text|rich }}</p>
+    {% if s.code %}<div class="codebox win"><div class="cb-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="cb-name">Add this</span><button type="button" data-copy>Copy</button></div><pre class="code"><code>{{ s.code|highlight }}</code></pre></div>{% endif %}</li>
+  {% endfor %}
+  </ol>
+
+  <h2 class="sec">Finished code</h2>
+  <p>Compare your version with this one. Edit it and press Run to experiment.</p>
+  <div class="editor split tall" data-editor>
+    <div class="ed-bar">
+      <span class="ed-title"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ed-file">index.html</span></span>
+      <span class="ed-actions"><span class="ed-hint">Ctrl + Enter to run</span><button class="ed-reset" type="button" data-reset>Reset</button><button class="btn small ed-run" type="button" data-run><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Run</button></span>
+    </div>
+    <div class="panes">
+      <div class="pane-in"><div class="pane-label">Complete project</div><textarea spellcheck="false" autocomplete="off" aria-label="Finished project code">{{ p.final }}</textarea></div>
+      <div class="pane-out"><div class="ed-bar res"><span class="pane-label">Result</span><span class="live"><i></i>Live preview</span></div><iframe title="Result" sandbox="allow-scripts" data-out></iframe></div>
+    </div>
+  </div>
+
+  {% if p.tips %}<h2 class="sec">Make it your own</h2><ul class="tasks">{% for t in p.tips %}<li>{{ t|rich }}</li>{% endfor %}</ul>{% endif %}
+  <p><a href="{{ url_for('projects') }}">All projects</a></p>
+</div>
+{% endcall %}
+{% endblock %}
